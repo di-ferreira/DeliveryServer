@@ -8,9 +8,11 @@ uses
 { (* }
 // - [ ]  Cliente
 // - [ ]  Endereços Cliente(Clientes podem ter mais de um endereço)
+//-----------------------------------------------------------------------------
 // - [ ]  Tipo Cardápio(Massas, bebidas, etc…)
 // - [ ]  Produto
 // - [ ]  Cardápio(o produto ou combo de produtos)
+//-----------------------------------------------------------------------------
 // - [ ]  Pedido
 // - [ ]  Pedido Item
 { *) }
