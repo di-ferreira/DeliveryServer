@@ -1,0 +1,342 @@
+unit Server.Delivery.DTO;
+
+interface
+
+uses
+  System.Generics.Collections;
+
+{ (* }
+// - [ ]  Cliente
+// - [ ]  Endereços Cliente(Clientes podem ter mais de um endereço)
+// - [ ]  Tipo Cardápio(Massas, bebidas, etc…)
+// - [ ]  Produto
+// - [ ]  Cardápio(o produto ou combo de produtos)
+// - [ ]  Pedido
+// - [ ]  Pedido Item
+{ *) }
+
+type
+  TCLIENTE = class;
+
+  TENDERECO = class;
+
+  TTIPO_CARDAPIO = class;
+
+  TPRODUTO = class;
+
+  TCARDAPIO = class;
+
+  TPEDIDO = class;
+
+  TITEM_PEDIDO = class;
+
+  TCLIENTE = class
+  private
+    FCONTATO: string;
+    FID: Integer;
+    FNOME: string;
+    procedure SetCONTATO(const Value: string);
+    procedure SetID(const Value: Integer);
+    procedure SetNOME(const Value: string);
+  published
+    property ID: Integer read FID write SetID;
+    property NOME: string read FNOME write SetNOME;
+    property CONTATO: string read FCONTATO write SetCONTATO;
+  end;
+
+  TENDERECO = class
+  private
+    FBAIRRO: string;
+    FCLIENTE: TCLIENTE;
+    FID: Integer;
+    FNUMERO: string;
+    FCOMPLEMENTO: string;
+    FCIDADE: string;
+    FESTADO: string;
+    FRUA: string;
+    procedure SetBAIRRO(const Value: string);
+    procedure SetCIDADE(const Value: string);
+    procedure SetCLIENTE(const Value: TCLIENTE);
+    procedure SetCOMPLEMENTO(const Value: string);
+    procedure SetESTADO(const Value: string);
+    procedure SetID(const Value: Integer);
+    procedure SetNUMERO(const Value: string);
+    procedure SetRUA(const Value: string);
+  published
+    property ID: Integer read FID write SetID;
+    property RUA: string read FRUA write SetRUA;
+    property NUMERO: string read FNUMERO write SetNUMERO;
+    property BAIRRO: string read FBAIRRO write SetBAIRRO;
+    property CIDADE: string read FCIDADE write SetCIDADE;
+    property ESTADO: string read FESTADO write SetESTADO;
+    property COMPLEMENTO: string read FCOMPLEMENTO write SetCOMPLEMENTO;
+    property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
+  end;
+
+  TTIPO_CARDAPIO = class
+  private
+    FDESCRICAO: string;
+    FID: Integer;
+    procedure SetDESCRICAO(const Value: string);
+    procedure SetID(const Value: Integer);
+  published
+    property ID: Integer read FID write SetID;
+    property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
+  end;
+
+  TPRODUTO = class
+  private
+    FESTOQUE: Integer;
+    FID: Integer;
+    FPERCENTUAL_LUCRO: Double;
+    FNOME: string;
+    FCUSTO: Double;
+    procedure SetCUSTO(const Value: Double);
+    procedure SetESTOQUE(const Value: Integer);
+    procedure SetID(const Value: Integer);
+    procedure SetNOME(const Value: string);
+    procedure SetPERCENTUAL_LUCRO(const Value: Double);
+  published
+    property ID: Integer read FID write SetID;
+    property NOME: string read FNOME write SetNOME;
+    property ESTOQUE: Integer read FESTOQUE write SetESTOQUE;
+    property CUSTO: Double read FCUSTO write SetCUSTO;
+    property PERCENTUAL_LUCRO: Double read FPERCENTUAL_LUCRO write SetPERCENTUAL_LUCRO;
+  end;
+
+  TCARDAPIO = class
+  private
+    FPRECO: Double;
+    FDESCRICAO: string;
+    FID: Integer;
+    FPRODUTO: TObjectList<TPRODUTO>;
+    procedure SetDESCRICAO(const Value: string);
+    procedure SetID(const Value: Integer);
+    procedure SetPRECO(const Value: Double);
+    procedure SetPRODUTO(const Value: TObjectList<TPRODUTO>);
+  published
+    property ID: Integer read FID write SetID;
+    property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
+    property PRECO: Double read FPRECO write SetPRECO;
+    property PRODUTO: TObjectList<TPRODUTO> read FPRODUTO write SetPRODUTO;
+  end;
+
+  TPEDIDO = class
+  private
+    FCLIENTE: TCLIENTE;
+    FTOTAL: Double;
+    FID: Integer;
+    FENDERECO_ENTREGA: TENDERECO;
+    FDATA: TDateTime;
+    procedure SetCLIENTE(const Value: TCLIENTE);
+    procedure SetDATA(const Value: TDateTime);
+    procedure SetENDERECO_ENTREGA(const Value: TENDERECO);
+    procedure SetID(const Value: Integer);
+    procedure SetTOTAL(const Value: Double);
+  published
+    property ID: Integer read FID write SetID;
+    property DATA: TDateTime read FDATA write SetDATA;
+    property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
+    property TOTAL: Double read FTOTAL write SetTOTAL;
+    property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
+  end;
+
+  TITEM_PEDIDO = class
+  private
+    FITEM_CARDAPIO: TCARDAPIO;
+    FPEDIDO: TPEDIDO;
+    FTOTAL: Double;
+    FID: Integer;
+    FQUANTIDADE: Integer;
+    procedure SetID(const Value: Integer);
+    procedure SetITEM_CARDAPIO(const Value: TCARDAPIO);
+    procedure SetPEDIDO(const Value: TPEDIDO);
+    procedure SetQUANTIDADE(const Value: Integer);
+    procedure SetTOTAL(const Value: Double);
+  published
+    property ID: Integer read FID write SetID;
+    property PEDIDO: TPEDIDO read FPEDIDO write SetPEDIDO;
+    property ITEM_CARDAPIO: TCARDAPIO read FITEM_CARDAPIO write SetITEM_CARDAPIO;
+    property QUANTIDADE: Integer read FQUANTIDADE write SetQUANTIDADE;
+    property TOTAL: Double read FTOTAL write SetTOTAL;
+  end;
+
+implementation
+
+{ TCLIENTE }
+
+procedure TCLIENTE.SetCONTATO(const Value: string);
+begin
+  FCONTATO := Value;
+end;
+
+procedure TCLIENTE.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TCLIENTE.SetNOME(const Value: string);
+begin
+  FNOME := Value;
+end;
+
+{ TENDERECO }
+
+procedure TENDERECO.SetBAIRRO(const Value: string);
+begin
+  FBAIRRO := Value;
+end;
+
+procedure TENDERECO.SetCIDADE(const Value: string);
+begin
+  FCIDADE := Value;
+end;
+
+procedure TENDERECO.SetCLIENTE(const Value: TCLIENTE);
+begin
+  FCLIENTE := Value;
+end;
+
+procedure TENDERECO.SetCOMPLEMENTO(const Value: string);
+begin
+  FCOMPLEMENTO := Value;
+end;
+
+procedure TENDERECO.SetESTADO(const Value: string);
+begin
+  FESTADO := Value;
+end;
+
+procedure TENDERECO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TENDERECO.SetNUMERO(const Value: string);
+begin
+  FNUMERO := Value;
+end;
+
+procedure TENDERECO.SetRUA(const Value: string);
+begin
+  FRUA := Value;
+end;
+
+{ TTIPO_CARDAPIO }
+
+procedure TTIPO_CARDAPIO.SetDESCRICAO(const Value: string);
+begin
+  FDESCRICAO := Value;
+end;
+
+procedure TTIPO_CARDAPIO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+{ TPRODUTO }
+
+procedure TPRODUTO.SetCUSTO(const Value: Double);
+begin
+  FCUSTO := Value;
+end;
+
+procedure TPRODUTO.SetESTOQUE(const Value: Integer);
+begin
+  FESTOQUE := Value;
+end;
+
+procedure TPRODUTO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TPRODUTO.SetNOME(const Value: string);
+begin
+  FNOME := Value;
+end;
+
+procedure TPRODUTO.SetPERCENTUAL_LUCRO(const Value: Double);
+begin
+  FPERCENTUAL_LUCRO := Value;
+end;
+
+{ TCARDAPIO }
+
+procedure TCARDAPIO.SetDESCRICAO(const Value: string);
+begin
+  FDESCRICAO := Value;
+end;
+
+procedure TCARDAPIO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TCARDAPIO.SetPRECO(const Value: Double);
+begin
+  FPRECO := Value;
+end;
+
+
+procedure TCARDAPIO.SetPRODUTO(const Value: TObjectList<TPRODUTO>);
+begin
+  FPRODUTO := Value;
+end;
+
+{ TPEDIDO }
+
+procedure TPEDIDO.SetCLIENTE(const Value: TCLIENTE);
+begin
+  FCLIENTE := Value;
+end;
+
+procedure TPEDIDO.SetDATA(const Value: TDateTime);
+begin
+  FDATA := Value;
+end;
+
+procedure TPEDIDO.SetENDERECO_ENTREGA(const Value: TENDERECO);
+begin
+  FENDERECO_ENTREGA := Value;
+end;
+
+procedure TPEDIDO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TPEDIDO.SetTOTAL(const Value: Double);
+begin
+  FTOTAL := Value;
+end;
+
+{ TITEM_PEDIDO }
+
+procedure TITEM_PEDIDO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TITEM_PEDIDO.SetITEM_CARDAPIO(const Value: TCARDAPIO);
+begin
+  FITEM_CARDAPIO := Value;
+end;
+
+procedure TITEM_PEDIDO.SetPEDIDO(const Value: TPEDIDO);
+begin
+  FPEDIDO := Value;
+end;
+
+procedure TITEM_PEDIDO.SetQUANTIDADE(const Value: Integer);
+begin
+  FQUANTIDADE := Value;
+end;
+
+procedure TITEM_PEDIDO.SetTOTAL(const Value: Double);
+begin
+  FTOTAL := Value;
+end;
+
+end.
+

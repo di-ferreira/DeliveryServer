@@ -1,0 +1,16 @@
+/*.local
+/*.identcache
+/*/*.local
+/*/.identcache
+/__*
+/*-lock.*
+/modules
+/*/__*
+/*.db
+/*/*.db
+/Win32
+/TEST/Win32
+/*.res
+/*/*.res
+/TEST/Server.Delivery.Test.identcache
+/TEST/Server.Delivery.Test.dproj.local

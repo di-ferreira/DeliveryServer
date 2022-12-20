@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{B85A7182-6376-4505-950B-745413C164D1}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Server.Delivery.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TEST\Server.Delivery.Test.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Server_Delivery">
+        <MSBuild Projects="Server.Delivery.dproj"/>
+    </Target>
+    <Target Name="Server_Delivery:Clean">
+        <MSBuild Projects="Server.Delivery.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Server_Delivery:Make">
+        <MSBuild Projects="Server.Delivery.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Server_Delivery_Test">
+        <MSBuild Projects="TEST\Server.Delivery.Test.dproj"/>
+    </Target>
+    <Target Name="Server_Delivery_Test:Clean">
+        <MSBuild Projects="TEST\Server.Delivery.Test.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Server_Delivery_Test:Make">
+        <MSBuild Projects="TEST\Server.Delivery.Test.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Server_Delivery;Server_Delivery_Test"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Server_Delivery:Clean;Server_Delivery_Test:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Server_Delivery:Make;Server_Delivery_Test:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
