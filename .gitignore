@@ -14,3 +14,5 @@
 /*/*.res
 /TEST/Server.Delivery.Test.identcache
 /TEST/Server.Delivery.Test.dproj.local
+/*/node_modules
+/*/*.lock

@@ -1,0 +1,12 @@
+{
+  "name": "delivery-server-tests",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "cy:open": "cypress open",
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^12.2.0"
+  }
+}
