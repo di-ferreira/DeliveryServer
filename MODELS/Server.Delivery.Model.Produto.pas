@@ -17,7 +17,7 @@ uses
   Server.Delivery.SQLite.Connection;
 
 type
-  TModelSistemaVendaProduto = class(TInterfacedObject, iModelServerDelivery<TPRODUTO>)
+  TModelServerDeliveryProduto = class(TInterfacedObject, iModelServerDelivery<TPRODUTO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -34,9 +34,9 @@ type
   end;
 
 implementation
-{ TModelSistemaVendaProduto }
+{ TModelServerDeliveryProduto }
 
-constructor TModelSistemaVendaProduto.Create;
+constructor TModelServerDeliveryProduto.Create;
 begin
   FConnection := TServerDeliverySQLiteConnection.New;
   FQuery := TFDQuery.Create(nil);
@@ -44,7 +44,7 @@ begin
   FConnection.Connection.TxOptions.AutoCommit := False;
 end;
 
-function TModelSistemaVendaProduto.Delete(aID: Integer): TJSONObject;
+function TModelServerDeliveryProduto.Delete(aID: Integer): TJSONObject;
 begin
   FSQL := 'DELETE FROM PRODUTOS WHERE id = :id';
   with FQuery do
@@ -66,13 +66,13 @@ begin
   Result := TJSONObject.Create;
 end;
 
-destructor TModelSistemaVendaProduto.Destroy;
+destructor TModelServerDeliveryProduto.Destroy;
 begin
   FreeAndNil(FQuery);
   inherited;
 end;
 
-function TModelSistemaVendaProduto.GetAll: TJSONArray;
+function TModelServerDeliveryProduto.GetAll: TJSONArray;
 begin
   FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO FROM PRODUTOS';
   with FQuery do
@@ -84,7 +84,7 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelSistemaVendaProduto.GetByID(aID: Integer): TJSONObject;
+function TModelServerDeliveryProduto.GetByID(aID: Integer): TJSONObject;
 begin
   FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO FROM PRODUTOS WHERE ID=:ID';
   with FQuery do
@@ -97,12 +97,12 @@ begin
   Result := FQuery.ToJSONObject();
 end;
 
-class function TModelSistemaVendaProduto.New: iModelServerDelivery<TPRODUTO>;
+class function TModelServerDeliveryProduto.New: iModelServerDelivery<TPRODUTO>;
 begin
   Result := Self.Create;
 end;
 
-function TModelSistemaVendaProduto.Save(aValue: TPRODUTO): TJSONObject;
+function TModelServerDeliveryProduto.Save(aValue: TPRODUTO): TJSONObject;
 begin
   FSQL := 'INSERT INTO PRODUTOS (ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO) VALUES (Null, :NOME, :ESTOQUE, :CUSTO, :PERCENTUAL_LUCRO);';
 
@@ -138,7 +138,7 @@ begin
   end;
 end;
 
-function TModelSistemaVendaProduto.Update(aValue: TPRODUTO): TJSONObject;
+function TModelServerDeliveryProduto.Update(aValue: TPRODUTO): TJSONObject;
 begin
 //  FSQL := 'UPDATE PRODUTOS SET nome = :nome, preco = :preco, estoque = :estoque WHERE id = :id';
 //  with FQuery do

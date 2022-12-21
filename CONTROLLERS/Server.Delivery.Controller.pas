@@ -5,19 +5,21 @@ interface
 uses
   Server.Delivery.DTO, Server.Delivery.Controller.Interfaces,
   Server.Delivery.Model.Interfaces, Server.Delivery.Model.Produto,
-  Server.Delivery.Model.Cliente;
+  Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco;
 
 type
   TControllerServerDelivery = class(TInterfacedObject, iControllerServerDelivery)
   private
     FPRODUTO: iModelServerDelivery<TPRODUTO>;
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
+    FENDERECO:  iModelServerDelivery<TENDERECO>;
   public
     constructor Create;
     destructor Destroy; override;
     class function New: iControllerServerDelivery;
     function PRODUTO: iModelServerDelivery<TPRODUTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
+    function ENDERECO: iModelServerDelivery<TENDERECO>;
   end;
 
 implementation
@@ -43,6 +45,14 @@ begin
   inherited;
 end;
 
+function TControllerServerDelivery.ENDERECO: iModelServerDelivery<TENDERECO>;
+begin
+    if not Assigned(FENDERECO) then
+    FENDERECO := TModelServerDeliveryEndereco.New;
+
+  Result := FENDERECO;
+end;
+
 class function TControllerServerDelivery.New: iControllerServerDelivery;
 begin
   Result := Self.Create;
@@ -51,7 +61,7 @@ end;
 function TControllerServerDelivery.PRODUTO: iModelServerDelivery<TPRODUTO>;
 begin
   if not Assigned(FPRODUTO) then
-    FPRODUTO := TModelSistemaVendaProduto.New;
+    FPRODUTO := TModelServerDeliveryProduto.New;
 
   Result := FPRODUTO;
 end;
