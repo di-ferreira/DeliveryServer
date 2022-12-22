@@ -24,11 +24,12 @@ begin
   lController := TControllerServerDelivery.New;
 
   lBody := lController.CLIENTE.GetAll;
+  Res.ContentType('application/json;charset=UTF-8');
 
   if lBody.Count > 0 then
     Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(lBody.ToJSON).Status(THTTPStatus.NoContent);
+    Res.Send<TJSONArray>(lBody).Status(THTTPStatus.NoContent);
 end;
 
 procedure GetClienteByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -38,6 +39,8 @@ var
   lBody: TJSONObject;
   lController: iControllerServerDelivery;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
+
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
@@ -62,10 +65,20 @@ var
   lController: iControllerServerDelivery;
   lClienteValue: TCLIENTE;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
+
   lController := TControllerServerDelivery.New;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
 
   lClienteValue := TJSON.JsonToObject<TCLIENTE>(lBody.ToJSON);
+
+  lResult := lController.CLIENTE.GetByContato(lClienteValue.CONTATO);
+
+  if lResult.Count > 0 then
+  begin
+    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Cliente possui cadastro').ToJSON).Status(THTTPStatus.BadRequest);
+    exit;
+  end;
 
   lResult := lController.CLIENTE.Save(lClienteValue);
 
