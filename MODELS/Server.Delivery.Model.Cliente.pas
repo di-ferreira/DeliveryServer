@@ -180,20 +180,24 @@ begin
     Connection.StartTransaction;
     SQL.Text := FSQL;
     try
-      try
-        ParamByName('id').Value := aValue.ID;
-        ParamByName('nome').Value := aValue.NOME;
-        ExecSQL;
-        Connection.Commit;
-      except
-        on E: Exception do
-        begin
-          Connection.Rollback;
-          Result := TJSONObject.Create.AddPair('RESULT', 'Erro ao Atualizar Cliente');
-        end;
+      ParamByName('id').Value := aValue.ID;
+      ParamByName('nome').Value := aValue.NOME;
+      ExecSQL;
+      Connection.Commit;
+
+      FSQL := 'SELECT id, nome, contato FROM CLIENTES WHERE ID=:ID;';
+      ParamByName('ID').Value := aValue.ID;
+      Close;
+      SQL.Text := FSQL;
+      Open;
+
+      Result := FQuery.ToJSONObject();
+    except
+      on E: Exception do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
       end;
-    finally
-      Result := TJSONObject.Create.AddPair('RESULT', 'Atualizado com sucesso!');
     end;
   end;
 end;

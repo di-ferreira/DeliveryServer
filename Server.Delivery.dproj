@@ -118,6 +118,8 @@
         <DCCReference Include="MODELS\Server.Delivery.Model.Cliente.pas"/>
         <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Cliente.Route.pas"/>
         <DCCReference Include="CONTROLLERS\Server.Delivery.Controller.Routes.pas"/>
+        <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Endereco.Route.pas"/>
+        <DCCReference Include="MODELS\Server.Delivery.Model.Endereco.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

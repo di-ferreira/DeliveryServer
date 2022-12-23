@@ -13,7 +13,9 @@ uses
   Server.Delivery.MySQL.Connection in 'MODELS\Server.Delivery.MySQL.Connection.pas',
   Server.Delivery.Model.Cliente in 'MODELS\Server.Delivery.Model.Cliente.pas',
   Controllers.Server.Delivery.Cliente.Route in 'CONTROLLERS\Controllers.Server.Delivery.Cliente.Route.pas',
-  Server.Delivery.Controller.Routes in 'CONTROLLERS\Server.Delivery.Controller.Routes.pas';
+  Server.Delivery.Controller.Routes in 'CONTROLLERS\Server.Delivery.Controller.Routes.pas',
+  Controllers.Server.Delivery.Endereco.Route in 'CONTROLLERS\Controllers.Server.Delivery.Endereco.Route.pas',
+  Server.Delivery.Model.Endereco in 'MODELS\Server.Delivery.Model.Endereco.pas';
 
 {$R *.res}
 

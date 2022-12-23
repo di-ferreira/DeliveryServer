@@ -92,10 +92,11 @@ procedure UpdateCliente(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
-  lBody: TJSONObject;
+  lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lClienteUpdated: TCLIENTE;
+  lClienteFound,lClienteBody: TCLIENTE;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
@@ -107,12 +108,18 @@ begin
   else
     lBody := lController.CLIENTE.GetByContato(lValue);
 
-  lClienteUpdated := TJSON.JsonToObject<TCLIENTE>(Req.Body);
+  lClienteFound := TJSON.JsonToObject<TCLIENTE>(lBody);
 
-  if lBody.Count > 0 then
-    Res.Send(lController.CLIENTE.Update(lClienteUpdated).ToJSON).Status(THTTPStatus.OK)
+  lClienteBody := TJSON.JsonToObject<TCLIENTE>(Req.Body);
+
+  lClienteFound.NOME := lClienteBody.NOME;
+
+  lResult := lController.CLIENTE.Update(lClienteFound);
+
+  if lResult.Count > 0 then
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Cliente atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Erro ao atualizar cliente!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
 procedure DeleteCliente(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -123,6 +130,7 @@ var
   lController: iControllerServerDelivery;
   lCliente: TCLIENTE;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
