@@ -16,7 +16,7 @@ uses
   Server.Delivery.SQLite.Connection, System.JSON;
 
 type
-  TModelServerDeliveryEndereco = class(TInterfacedObject, iModelServerDelivery<TENDERECO>)
+  TModelServerDeliveryEndereco = class(TInterfacedObject, iModelServerDeliveryEndereco<TENDERECO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -24,11 +24,11 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    class function New: iModelServerDelivery<TENDERECO>;
+    class function New: iModelServerDeliveryEndereco<TENDERECO>;
     function Save(aValue: TENDERECO): TJSONObject;
-    function GetAll: TJSONArray;
+    function GetAll: TJSONArray;  overload;
+    function GetAll(aID_CLIENTE: Integer): TJSONArray;  overload;
     function GetByID(aID: Integer): TJSONObject;
-    function GetByContato(aContato: string): TJSONObject;
     function Update(aValue: TENDERECO): TJSONObject;
     function Delete(aID: Integer): TJSONObject; overload;
     function Delete(aValue: string): TJSONObject; overload;
@@ -99,7 +99,7 @@ end;
 
 function TModelServerDeliveryEndereco.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT id, nome, contato FROM CLIENTES';
+  FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO FROM ENDERECOS;';
   with FQuery do
   begin
     Close;
@@ -110,17 +110,18 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryEndereco.GetByContato(aContato: string): TJSONObject;
+function TModelServerDeliveryEndereco.GetAll(aID_CLIENTE: Integer): TJSONArray;
 begin
-  FSQL := 'SELECT id, nome, contato FROM CLIENTES WHERE contato=:contato';
+  FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO FROM ENDERECOS WHERE ID_CLIENTE = :ID_CLIENTE;';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('contato').Value := aContato;
+    ParamByName('ID_CLIENTE').Value := aID_CLIENTE;
     Open;
   end;
-  Result := FQuery.ToJSONObject();
+
+  Result := FQuery.ToJSONArray();
 end;
 
 function TModelServerDeliveryEndereco.GetByID(aID: Integer): TJSONObject;
@@ -136,7 +137,7 @@ begin
   Result := FQuery.ToJSONObject();
 end;
 
-class function TModelServerDeliveryEndereco.New: iModelServerDelivery<TENDERECO>;
+class function TModelServerDeliveryEndereco.New: iModelServerDeliveryEndereco<TENDERECO>;
 begin
   Result := Self.Create;
 end;

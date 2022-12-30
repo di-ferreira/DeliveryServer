@@ -12,14 +12,14 @@ type
   private
     FPRODUTO: iModelServerDelivery<TPRODUTO>;
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
-    FENDERECO:  iModelServerDelivery<TENDERECO>;
+    FENDERECO:  iModelServerDeliveryEndereco<TENDERECO>;
   public
     constructor Create;
     destructor Destroy; override;
     class function New: iControllerServerDelivery;
     function PRODUTO: iModelServerDelivery<TPRODUTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
-    function ENDERECO: iModelServerDelivery<TENDERECO>;
+    function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
   end;
 
 implementation
@@ -45,7 +45,7 @@ begin
   inherited;
 end;
 
-function TControllerServerDelivery.ENDERECO: iModelServerDelivery<TENDERECO>;
+function TControllerServerDelivery.ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
 begin
     if not Assigned(FENDERECO) then
     FENDERECO := TModelServerDeliveryEndereco.New;

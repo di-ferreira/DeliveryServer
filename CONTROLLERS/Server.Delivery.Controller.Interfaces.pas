@@ -11,7 +11,7 @@ type
     ['{61D5253A-403D-4480-8D1D-F61B5C17F98F}']
     function PRODUTO: iModelServerDelivery<TPRODUTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
-    function ENDERECO: iModelServerDelivery<TENDERECO>;
+    function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
   end;
 
 implementation

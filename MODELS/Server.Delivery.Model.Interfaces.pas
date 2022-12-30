@@ -21,6 +21,12 @@ type
     function Delete(aValue: string): TJSONObject; overload;
   end;
 
+  iModelServerDeliveryEndereco<T: class, constructor> = interface(iModelServerDelivery<T>)
+    ['{445CC15B-AD35-4CC1-B2FE-771A1F28256B}']
+    function GetAll(aID_CLIENTE: Integer): TJSONArray; overload;
+    function Delete(aID: Integer): TJSONObject; overload;
+  end;
+
   iModelServerDeliveryConnection = interface
     ['{538D49B4-4CDE-424C-8C5E-E520F01DC628}']
     function Connection: TFDConnection;

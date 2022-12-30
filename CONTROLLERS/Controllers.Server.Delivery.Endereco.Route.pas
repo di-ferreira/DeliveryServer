@@ -18,17 +18,32 @@ implementation
 
 procedure GetEnderecos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
-  lBody: TJSONArray;
+  lID_CLIENTE: Integer;
+  lCliente, lResult: TJSONObject;
+  lValue: string;
   lController: iControllerServerDelivery;
+  lClienteValue: TCLIENTE;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
+  lValue := Req.Params['id_cliente'];
 
-  lBody := lController.CLIENTE.GetAll;
-
-  if lBody.Count > 0 then
-    Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
+  if lValue.Length < 10 then
+  begin
+    if TryStrToInt(lValue, lID_CLIENTE) then
+      lCliente := lController.CLIENTE.GetByID(lID_CLIENTE);
+  end
   else
-    Res.Send(lBody.ToJSON).Status(THTTPStatus.NoContent);
+    lCliente := lController.CLIENTE.GetByContato(lValue);
+
+  lClienteValue := TJSON.JsonToObject<TCLIENTE>(lCliente.ToJSON);
+
+  lResult := lCliente.AddPair('ENDERECOS', lController.ENDERECO.GetAll(lClienteValue.ID));
+
+  if lResult.Count > 0 then
+    Res.Send(lResult.ToJSON).Status(THTTPStatus.OK)
+  else
+    Res.Send(lResult.ToJSON).Status(THTTPStatus.NoContent);
 end;
 
 procedure GetEnderecosByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -60,7 +75,7 @@ var
   lBody: TJSONValue;
   lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lCliente:TCLIENTE;
+  lCliente: TCLIENTE;
   lEnderecoValue: TENDERECO;
 begin
   Res.ContentType('application/json;charset=UTF-8');
@@ -155,11 +170,6 @@ begin
     .Get(':id', GetEnderecosByID)
     .Put(':id', UpdateEnderecos)
     .Delete(':id', DeleteEnderecos);
-
-    THorse
-    .Group
-      .Prefix('endereco')
-    .Get(':id', GetEnderecosByID);
 {*)}
 end;
 
