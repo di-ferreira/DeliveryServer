@@ -142,33 +142,54 @@ begin
 end;
 
 function TModelServerDeliveryEndereco.Save(aValue: TENDERECO): TJSONObject;
+var
+vResult:TJSONObject;
 begin
-//  FSQL := 'INSERT INTO CLIENTES (id, nome, contato) VALUES (NULL,:nome,:contato)';
-//
-//  with FQuery do
-//  begin
-//    try
-//      Connection.StartTransaction;
-//      SQL.Text := FSQL;
-//      ParamByName('nome').Value := aValue.NOME;
-//      ParamByName('contato').Value := aValue.CONTATO;
-//      ExecSQL;
-//      Connection.Commit;
-//      FSQL := 'SELECT id, nome, contato FROM CLIENTES WHERE ID=last_insert_rowid();';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      Open;
-//
-//      Result := FQuery.ToJSONObject();
-//    except
-//      on E: Exception do
-//      begin
-//        Connection.Rollback;
-//        Result := TJSONObject.Create;
-//      end;
-//    end;
-//  end;
+  FSQL := 'INSERT INTO ENDERECOS (ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO, ID_CLIENTE) VALUES (null, :RUA, :NUMERO, :BAIRRO, :COMPLEMENTO, :CIDADE, :ESTADO, :ID_CLIENTE)';
+
+  with FQuery do
+  begin
+    try
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+      ParamByName('RUA').Value := aValue.RUA;
+      ParamByName('NUMERO').Value := aValue.NUMERO;
+      ParamByName('BAIRRO').Value := aValue.BAIRRO;
+      ParamByName('COMPLEMENTO').Value := aValue.COMPLEMENTO;
+      ParamByName('CIDADE').Value := aValue.CIDADE;
+      ParamByName('ESTADO').Value := aValue.ESTADO;
+      ParamByName('ID_CLIENTE').Value := aValue.CLIENTE.ID;
+      ExecSQL;
+      FSQL := 'SELECT ENDERECOS.ID, ENDERECOS.RUA, ENDERECOS.NUMERO, ENDERECOS.BAIRRO, ENDERECOS.COMPLEMENTO, ENDERECOS.CIDADE, ENDERECOS.ESTADO, ENDERECOS.ID_CLIENTE, CLIENTES.NOME, CLIENTES.CONTATO FROM' +
+              ' ENDERECOS INNER JOIN CLIENTES  ON ENDERECOS.ID_CLIENTE = CLIENTES.ID WHERE ENDERECOS.ID = last_insert_rowid();';
+
+      Close;
+      SQL.Text := FSQL;
+      Open;
+
+      vResult := TJSONObject.Create()
+                            .AddPair('ID',FieldByName('ID').AsInteger)
+                            .AddPair('RUA',FieldByName('RUA').AsString)
+                            .AddPair('NUMERO',FieldByName('NUMERO').AsString)
+                            .AddPair('BAIRRO',FieldByName('BAIRRO').AsString)
+                            .AddPair('COMPLEMENTO',FieldByName('COMPLEMENTO').AsString)
+                            .AddPair('CIDADE',FieldByName('CIDADE').AsString)
+                            .AddPair('ESTADO',FieldByName('ESTADO').AsString)
+                            .AddPair('CLIENTE', TJSONObject.Create()
+                                                           .AddPair('ID', FieldByName('ID_CLIENTE').AsInteger)
+                                                           .AddPair('NOME', FieldByName('NOME').AsString)
+                                                           .AddPair('CONTATO', FieldByName('CONTATO').AsString));
+
+      Connection.Commit;
+      Result := vResult;
+    except
+      on E: Exception do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
 
 end;
 

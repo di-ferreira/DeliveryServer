@@ -60,19 +60,29 @@ var
   lBody: TJSONValue;
   lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lClienteValue: TCLIENTE;
+  lCliente:TCLIENTE;
+  lEnderecoValue: TENDERECO;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
+  lEnderecoValue := TENDERECO.Create;
+  lCliente := TJSON.JsonToObject<TCLIENTE>(lController.CLIENTE.GetByContato(Req.Params['id_cliente']));
+  lEnderecoValue.CLIENTE := lCliente;
+  lEnderecoValue.ID := lBody.GetValue<integer>('ID');
+  lEnderecoValue.RUA := lBody.GetValue<string>('RUA');
+  lEnderecoValue.NUMERO := lBody.GetValue<string>('NUMERO');
+  lEnderecoValue.BAIRRO := lBody.GetValue<string>('BAIRRO');
+  lEnderecoValue.COMPLEMENTO := lBody.GetValue<string>('COMPLEMENTO');
+  lEnderecoValue.CIDADE := lBody.GetValue<string>('CIDADE');
+  lEnderecoValue.ESTADO := lBody.GetValue<string>('ESTADO');
 
-  lClienteValue := TJSON.JsonToObject<TCLIENTE>(lBody.ToJSON);
-
-  lResult := lController.CLIENTE.Save(lClienteValue);
+  lResult := lController.ENDERECO.Save(lEnderecoValue);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Cliente salvo com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Endereço adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Erro ao salvar Cliente').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Erro ao salvar Endereço!').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
 procedure UpdateEnderecos(Req: THorseRequest; Res: THorseResponse; Next: TProc);

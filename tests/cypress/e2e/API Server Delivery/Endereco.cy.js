@@ -9,18 +9,10 @@ describe('Rotas POST Endereço', () => {
         });
     });
 
-    afterEach(() => {
-        cy.request({
-            method: 'DELETE',
-            url: '/cliente/1',
-            failOnStatusCode: false
-        });
-    });
-
     it('Criar Endereço - Sucesso', () => {
         cy.request({
             method: 'POST',
-            url: '/cliente/1/endereco',
+            url: '/cliente/55229785634/endereco',
             body: {
                 "ID": 0,
                 "CLIENTE": 4,
@@ -34,8 +26,16 @@ describe('Rotas POST Endereço', () => {
         }).then((Response) => {
             expect(Response.status).to.equal(201);
             expect(Response.body[0].Message).to.equal('Endereço adicionado com sucesso!');
-            expect(Response.body[1].contato).to.equal("55229785634");
-            expect(Response.body[1].nome).to.equal('Priscila G. Vieira');
+            expect(Response.body[1].CLIENTE.CONTATO).to.equal("55229785634");
+            expect(Response.body[1].CLIENTE.NOME).to.equal('Priscila G. Vieira');
+        });
+    });
+
+    afterEach(() => {
+        cy.request({
+            method: 'DELETE',
+            url: '/cliente/55229785634',
+            failOnStatusCode: false
         });
     });
 
