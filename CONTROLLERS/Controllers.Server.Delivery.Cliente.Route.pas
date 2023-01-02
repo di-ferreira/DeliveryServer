@@ -76,16 +76,16 @@ begin
 
   if lResult.Count > 0 then
   begin
-    Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente possui cadastro').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Cliente possui cadastro').ToJSON).Status(THTTPStatus.BadRequest);
     exit;
   end;
 
   lResult := lController.CLIENTE.Save(lClienteValue);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Cliente salvo com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Cliente salvo com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Erro ao salvar Cliente').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao salvar Cliente').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
 procedure UpdateCliente(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -117,9 +117,9 @@ begin
   lResult := lController.CLIENTE.Update(lClienteFound);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Cliente atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Cliente atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('Message', 'Erro ao atualizar cliente!').ToJSON).Status(THTTPStatus.InternalServerError);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar cliente!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
 procedure DeleteCliente(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -149,10 +149,10 @@ begin
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente excluído!').ToJSON).Status(THTTPStatus.Accepted)
+      Res.Send(TJSONObject.Create.AddPair('message', 'Cliente excluído!').ToJSON).Status(THTTPStatus.Accepted)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure Registry;
@@ -160,7 +160,7 @@ begin
 {(*}
   THorse
     .Group
-      .Prefix('cliente')
+      .Prefix('clientes')
     .Get('', GetClientes)
     .Post('', CreateCliente)
     .Get(':id', GetClienteByID)

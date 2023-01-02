@@ -47,13 +47,13 @@ end;
 
 function TModelServerDeliveryEndereco.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM ENDERECOS WHERE ID = :ID';
+  FSQL := 'delete from enderecos where id = :id';
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('ID').Value := aID;
+      ParamByName('id').Value := aID;
       ExecSQL;
       Connection.Commit;
       Result := TJSONObject.Create;
@@ -61,7 +61,7 @@ begin
       on E: Exception do
       begin
         Connection.Rollback;
-        Result := TJSONObject.Create.AddPair('RESULT', E.Message);
+        Result := TJSONObject.Create.AddPair('result', E.Message);
       end;
     end;
   end;
@@ -75,7 +75,7 @@ end;
 
 function TModelServerDeliveryEndereco.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO FROM ENDERECOS;';
+  FSQL := 'select id, rua, numero, bairro, complemento, cidade, estado from enderecos;';
   with FQuery do
   begin
     Close;
@@ -88,12 +88,12 @@ end;
 
 function TModelServerDeliveryEndereco.GetAll(aID_CLIENTE: Integer): TJSONArray;
 begin
-  FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO FROM ENDERECOS WHERE ID_CLIENTE = :ID_CLIENTE;';
+  FSQL := 'select id, rua, numero, bairro, complemento, cidade, estado from enderecos where id_cliente = :id_cliente;';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('ID_CLIENTE').Value := aID_CLIENTE;
+    ParamByName('id_cliente').Value := aID_CLIENTE;
     Open;
   end;
 
@@ -104,13 +104,13 @@ function TModelServerDeliveryEndereco.GetByID(aID: Integer): TJSONObject;
 var
   lEndereco: TJSONObject;
 begin
-  FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO, ID_CLIENTE FROM ENDERECOS WHERE ID=:ID';
+  FSQL := 'select id, rua, numero, bairro, complemento, cidade, estado, id_cliente from enderecos where id=:id';
 
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('ID').Value := aID;
+    ParamByName('id').Value := aID;
     Open;
   end;
 
@@ -128,28 +128,28 @@ function TModelServerDeliveryEndereco.Save(aValue: TENDERECO): TJSONObject;
 var
   vResult: TJSONObject;
 begin
-  FSQL := 'INSERT INTO ENDERECOS (ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO, ID_CLIENTE) VALUES (null, :RUA, :NUMERO, :BAIRRO, :COMPLEMENTO, :CIDADE, :ESTADO, :ID_CLIENTE)';
+  FSQL := 'insert into enderecos (id, rua, numero, bairro, complemento, cidade, estado, id_cliente) values (null, :rua, :numero, :bairro, :complemento, :cidade, :estado, :id_cliente)';
 
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('RUA').Value := aValue.RUA;
-      ParamByName('NUMERO').Value := aValue.NUMERO;
-      ParamByName('BAIRRO').Value := aValue.BAIRRO;
-      ParamByName('COMPLEMENTO').Value := aValue.COMPLEMENTO;
-      ParamByName('CIDADE').Value := aValue.CIDADE;
-      ParamByName('ESTADO').Value := aValue.ESTADO;
-      ParamByName('ID_CLIENTE').Value := aValue.CLIENTE.ID;
+      ParamByName('rua').Value := aValue.RUA;
+      ParamByName('numero').Value := aValue.NUMERO;
+      ParamByName('bairro').Value := aValue.BAIRRO;
+      ParamByName('complemento').Value := aValue.COMPLEMENTO;
+      ParamByName('cidade').Value := aValue.CIDADE;
+      ParamByName('estado').Value := aValue.ESTADO;
+      ParamByName('id_cliente').Value := aValue.CLIENTE.ID;
       ExecSQL;
-      FSQL := 'SELECT ENDERECOS.ID, ENDERECOS.RUA, ENDERECOS.NUMERO, ENDERECOS.BAIRRO, ENDERECOS.COMPLEMENTO, ENDERECOS.CIDADE, ENDERECOS.ESTADO, ENDERECOS.ID_CLIENTE, CLIENTES.NOME, CLIENTES.CONTATO FROM' + ' ENDERECOS INNER JOIN CLIENTES  ON ENDERECOS.ID_CLIENTE = CLIENTES.ID WHERE ENDERECOS.ID = last_insert_rowid();';
+      FSQL := 'select enderecos.id, enderecos.rua, enderecos.numero, enderecos.bairro, enderecos.complemento, enderecos.cidade, enderecos.estado, enderecos.id_cliente, clientes.nome, clientes.contato from' + ' enderecos inner join clientes  on enderecos.id_cliente = clientes.id where enderecos.id = last_insert_rowid();';
 
       Close;
       SQL.Text := FSQL;
       Open;
 
-      vResult := TJSONObject.Create().AddPair('ID', FieldByName('ID').AsInteger).AddPair('RUA', FieldByName('RUA').AsString).AddPair('NUMERO', FieldByName('NUMERO').AsString).AddPair('BAIRRO', FieldByName('BAIRRO').AsString).AddPair('COMPLEMENTO', FieldByName('COMPLEMENTO').AsString).AddPair('CIDADE', FieldByName('CIDADE').AsString).AddPair('ESTADO', FieldByName('ESTADO').AsString).AddPair('CLIENTE', TJSONObject.Create().AddPair('ID', FieldByName('ID_CLIENTE').AsInteger).AddPair('NOME', FieldByName('NOME').AsString).AddPair('CONTATO', FieldByName('CONTATO').AsString));
+      vResult := TJSONObject.Create().AddPair('id', FieldByName('id').AsInteger).AddPair('rua', FieldByName('rua').AsString).AddPair('numero', FieldByName('numero').AsString).AddPair('bairro', FieldByName('bairro').AsString).AddPair('complemento', FieldByName('complemento').AsString).AddPair('cidade', FieldByName('cidade').AsString).AddPair('estado', FieldByName('estado').AsString).AddPair('cliente', TJSONObject.Create().AddPair('id', FieldByName('id_cliente').AsInteger).AddPair('nome', FieldByName('nome').AsString).AddPair('contato', FieldByName('contato').AsString));
 
       Connection.Commit;
       Result := vResult;
@@ -168,29 +168,29 @@ function TModelServerDeliveryEndereco.Update(aValue: TENDERECO): TJSONObject;
 var
   vResult: TJSONObject;
 begin
-  FSQL := 'UPDATE ENDERECOS SET RUA = :RUA, NUMERO = :NUMERO, BAIRRO = :BAIRRO, COMPLEMENTO = :COMPLEMENTO, CIDADE = :CIDADE, ESTADO = :ESTADO WHERE ID = :ID;';
+  FSQL := 'update enderecos set rua = :rua, numero = :numero, bairro = :bairro, complemento = :complemento, cidade = :cidade, estado = :estado where id = :id;';
 
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('RUA').Value := aValue.RUA;
-      ParamByName('NUMERO').Value := aValue.NUMERO;
-      ParamByName('BAIRRO').Value := aValue.BAIRRO;
-      ParamByName('COMPLEMENTO').Value := aValue.COMPLEMENTO;
-      ParamByName('CIDADE').Value := aValue.CIDADE;
-      ParamByName('ESTADO').Value := aValue.ESTADO;
-      ParamByName('ID').Value := aValue.ID;
+      ParamByName('rua').Value := aValue.RUA;
+      ParamByName('numero').Value := aValue.NUMERO;
+      ParamByName('bairro').Value := aValue.BAIRRO;
+      ParamByName('complemento').Value := aValue.COMPLEMENTO;
+      ParamByName('cidade').Value := aValue.CIDADE;
+      ParamByName('estado').Value := aValue.ESTADO;
+      ParamByName('id').Value := aValue.ID;
       ExecSQL;
 
-      FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO, ID_CLIENTE FROM ENDERECOS WHERE ID=:ID';
+      FSQL := 'select id, rua, numero, bairro, complemento, cidade, estado, id_cliente from enderecos where id=:id';
 
       with FQuery do
       begin
         Close;
         SQL.Text := FSQL;
-        ParamByName('ID').Value := aValue.ID;
+        ParamByName('id').Value := aValue.ID;
         Open;
       end;
 

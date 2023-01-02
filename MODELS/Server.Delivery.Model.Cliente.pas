@@ -48,13 +48,13 @@ end;
 
 function TModelServerDeliveryCliente.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM CLIENTES WHERE ID = :ID';
+  FSQL := 'delete from clientes where id = :id';
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('ID').Value := aID;
+      ParamByName('id').Value := aID;
       ExecSQL;
       Connection.Commit;
       Result := TJSONObject.Create;
@@ -62,7 +62,7 @@ begin
       on E: Exception do
       begin
         Connection.Rollback;
-        Result := TJSONObject.Create.AddPair('RESULT', E.Message);
+        Result := TJSONObject.Create.AddPair('result', E.Message);
       end;
     end;
   end;
@@ -70,14 +70,14 @@ end;
 
 function TModelServerDeliveryCliente.Delete(aValue: string): TJSONObject;
 begin
-  FSQL := 'DELETE FROM CLIENTES WHERE ID = :ID OR CONTATO = :CONTATO';
+  FSQL := 'delete from clientes where id = :id or contato = :contato';
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('ID').Value := aValue;
-      ParamByName('CONTATO').Value := aValue;
+      ParamByName('id').Value := aValue;
+      ParamByName('contato').Value := aValue;
       ExecSQL;
       Connection.Commit;
       Result := TJSONObject.Create;
@@ -85,7 +85,7 @@ begin
       on E: Exception do
       begin
         Connection.Rollback;
-        Result := TJSONObject.Create.AddPair('RESULT', E.Message);
+        Result := TJSONObject.Create.AddPair('result', E.Message);
       end;
     end;
   end;
@@ -99,7 +99,7 @@ end;
 
 function TModelServerDeliveryCliente.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT ID, NOME, CONTATO FROM CLIENTES';
+  FSQL := 'select id, nome, contato from clientes';
   with FQuery do
   begin
     Close;
@@ -112,12 +112,12 @@ end;
 
 function TModelServerDeliveryCliente.GetByContato(aContato: string): TJSONObject;
 begin
-  FSQL := 'SELECT ID, NOME, CONTATO FROM CLIENTES WHERE CONTATO=:CONTATO';
+  FSQL := 'select id, nome, contato from clientes where contato=:contato';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('CONTATO').Value := aContato;
+    ParamByName('contato').Value := aContato;
     Open;
   end;
   Result := FQuery.ToJSONObject();
@@ -125,12 +125,12 @@ end;
 
 function TModelServerDeliveryCliente.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT ID, NOME, CONTATO FROM CLIENTES WHERE ID=:ID';
+  FSQL := 'select id, nome, contato from clientes where id=:id';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('ID').Value := aID;
+    ParamByName('id').Value := aID;
     Open;
   end;
   Result := FQuery.ToJSONObject();
@@ -143,18 +143,18 @@ end;
 
 function TModelServerDeliveryCliente.Save(aValue: TCLIENTE): TJSONObject;
 begin
-  FSQL := 'INSERT INTO CLIENTES (ID, NOME, CONTATO) VALUES (NULL,:NOME,:CONTATO)';
+  FSQL := 'insert into clientes (id, nome, contato) values (null,:nome,:contato)';
 
   with FQuery do
   begin
     try
       Connection.StartTransaction;
       SQL.Text := FSQL;
-      ParamByName('NOME').Value := aValue.NOME;
-      ParamByName('CONTATO').Value := aValue.CONTATO;
+      ParamByName('nome').Value := aValue.NOME;
+      ParamByName('contato').Value := aValue.CONTATO;
       ExecSQL;
       Connection.Commit;
-      FSQL := 'SELECT ID, NOME, CONTATO FROM CLIENTES WHERE ID=last_insert_rowid();';
+      FSQL := 'select id, nome, contato from clientes where id=last_insert_rowid();';
 
       Close;
       SQL.Text := FSQL;
@@ -174,19 +174,19 @@ end;
 
 function TModelServerDeliveryCliente.Update(aValue: TCLIENTE): TJSONObject;
 begin
-  FSQL := 'UPDATE CLIENTES SET NOME = :NOME WHERE ID = :ID';
+  FSQL := 'update clientes set nome = :nome where id = :id';
   with FQuery do
   begin
     Connection.StartTransaction;
     SQL.Text := FSQL;
     try
-      ParamByName('ID').Value := aValue.ID;
-      ParamByName('NOME').Value := aValue.NOME;
+      ParamByName('id').Value := aValue.ID;
+      ParamByName('nome').Value := aValue.NOME;
       ExecSQL;
       Connection.Commit;
 
-      FSQL := 'SELECT ID, NOME, CONTATO FROM CLIENTES WHERE ID=:ID;';
-      ParamByName('ID').Value := aValue.ID;
+      FSQL := 'select id, nome, contato from clientes where id=:id;';
+      ParamByName('id').Value := aValue.ID;
       Close;
       SQL.Text := FSQL;
       Open;
