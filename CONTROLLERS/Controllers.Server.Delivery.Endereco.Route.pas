@@ -49,25 +49,35 @@ end;
 procedure GetEnderecosByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
-  lValue: string;
-  lBody: TJSONObject;
+  lParamID: string;
+  lResult: TJSONObject;
+  lCliente: TCLIENTE;
+  lEnderecoValue: TENDERECO;
   lController: iControllerServerDelivery;
 begin
-  lController := TControllerServerDelivery.New;
-  lValue := Req.Params['id'];
+  Res.ContentType('application/json;charset=UTF-8');
 
-  if lValue.Length < 10 then
+  lController := TControllerServerDelivery.New;
+  lParamID := Req.Params['id'];
+
+  if TryStrToInt(lParamID, lID) then
+    lResult := lController.ENDERECO.GetByID(lID)
+  else
   begin
-    if TryStrToInt(lValue, lID) then
-      lBody := lController.CLIENTE.GetByID(lID);
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+
+  if lResult.Count > 0 then
+  begin
+    lResult.AddPair('cliente', lController.CLIENTE.GetByID(lResult.GetValue<integer>('idCliente')));
+
+    lResult.RemovePair('idCliente');
+
+    Res.Send(lResult.ToJSON).Status(THTTPStatus.OK);
   end
   else
-    lBody := lController.CLIENTE.GetByContato(lValue);
-
-  if lBody.Count > 0 then
-    Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
-  else
-    Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create().AddPair('Message', 'Endereço não encontrado!').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure CreateEndereco(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -97,34 +107,52 @@ begin
   if lResult.Count > 0 then
     Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Endereço adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Erro ao salvar Endereço!').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Erro ao salvar Endereço!').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
 procedure UpdateEnderecos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
-  lValue: string;
-  lBody: TJSONObject;
+  lParamID: string;
+  lBody: TJSONValue;
+  lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lClienteUpdated: TCLIENTE;
+  lCliente: TCLIENTE;
+  lEnderecoValue: TENDERECO;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
-  lValue := Req.Params['id'];
+  lParamID := Req.Params['id'];
 
-  if lValue.Length < 10 then
+  if TryStrToInt(lParamID, lID) then
   begin
-    if TryStrToInt(lValue, lID) then
-      lBody := lController.CLIENTE.GetByID(lID);
+    lBody := TJSONObject.ParseJSONValue(Req.Body);
+    lEnderecoValue := TENDERECO.Create;
+    lEnderecoValue.ID := lID;
+    lEnderecoValue.RUA := lBody.GetValue<string>('RUA');
+    lEnderecoValue.NUMERO := lBody.GetValue<string>('NUMERO');
+    lEnderecoValue.BAIRRO := lBody.GetValue<string>('BAIRRO');
+    lEnderecoValue.COMPLEMENTO := lBody.GetValue<string>('COMPLEMENTO');
+    lEnderecoValue.CIDADE := lBody.GetValue<string>('CIDADE');
+    lEnderecoValue.ESTADO := lBody.GetValue<string>('ESTADO');
+
+    lResult := lController.ENDERECO.Update(lEnderecoValue);
+
+    lResult.AddPair('cliente', lController.CLIENTE.GetByID(lResult.GetValue<integer>('idCliente')));
+
+    lResult.RemovePair('idCliente');
   end
   else
-    lBody := lController.CLIENTE.GetByContato(lValue);
+  begin
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Endereço não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
 
-  lClienteUpdated := TJSON.JsonToObject<TCLIENTE>(Req.Body);
 
-  if lBody.Count > 0 then
-    Res.Send(lController.CLIENTE.Update(lClienteUpdated).ToJSON).Status(THTTPStatus.OK)
+  if lResult.Count > 0 then
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('Message', 'Endereço atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Erro ao atualizar Endereço!').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
 procedure DeleteEnderecos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -133,30 +161,28 @@ var
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lCliente: TCLIENTE;
+  lEndereco: TENDERECO;
 begin
+  Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
-  if lValue.Length < 10 then
-  begin
-    if TryStrToInt(lValue, lID) then
-      lBody := lController.CLIENTE.GetByID(lID);
-  end
-  else
-    lBody := lController.CLIENTE.GetByContato(lValue);
+  if TryStrToInt(lValue, lID) then
+      lBody := lController.ENDERECO.GetByID(lID);
 
   if lBody.Count > 0 then
   begin
-    lCliente := TJSON.JsonToObject<TCLIENTE>(lBody);
-    lResult := lController.CLIENTE.Delete(lCliente.ID);
+    lEndereco := TJSON.JsonToObject<TENDERECO>(lBody);
+
+    lResult := lController.ENDERECO.Delete(lEndereco.ID);
+
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente excluído!').ToJSON).Status(THTTPStatus.Accepted)
+      Res.Send(TJSONObject.Create.AddPair('Message', 'Endereço excluído!').ToJSON).Status(THTTPStatus.Accepted)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Endereço não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure Registry;
@@ -167,6 +193,13 @@ begin
       .Prefix('cliente/:id_cliente/endereco')
     .Get('', GetEnderecos)
     .Post('', CreateEndereco)
+    .Get(':id', GetEnderecosByID)
+    .Put(':id', UpdateEnderecos)
+    .Delete(':id', DeleteEnderecos);
+
+  THorse
+    .Group
+      .Prefix('endereco')
     .Get(':id', GetEnderecosByID)
     .Put(':id', UpdateEnderecos)
     .Delete(':id', DeleteEnderecos);

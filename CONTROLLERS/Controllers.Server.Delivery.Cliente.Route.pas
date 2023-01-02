@@ -76,7 +76,7 @@ begin
 
   if lResult.Count > 0 then
   begin
-    Res.Send(TJSONObject.Create.AddPair('ERROR', 'Cliente possui cadastro').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente possui cadastro').ToJSON).Status(THTTPStatus.BadRequest);
     exit;
   end;
 
@@ -149,10 +149,10 @@ begin
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente excluído!').ToJSON).Status(THTTPStatus.Accepted)
+      Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente excluído!').ToJSON).Status(THTTPStatus.Accepted)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('RESULT', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('Message', 'Cliente não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure Registry;
