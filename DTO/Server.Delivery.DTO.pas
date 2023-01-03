@@ -18,6 +18,8 @@ uses
 { *) }
 
 type
+  TTIPOPGTO = class;
+
   TCLIENTE = class;
 
   TENDERECO = class;
@@ -32,6 +34,8 @@ type
 
   TITEM_PEDIDO = class;
 
+  TCAIXA = class;
+
   TCLIENTE = class
   private
     FCONTATO: string;
@@ -40,7 +44,7 @@ type
     procedure SetCONTATO(const Value: string);
     procedure SetID(const Value: Integer);
     procedure SetNOME(const Value: string);
-  published
+  public
     property ID: Integer read FID write SetID;
     property NOME: string read FNOME write SetNOME;
     property CONTATO: string read FCONTATO write SetCONTATO;
@@ -64,7 +68,7 @@ type
     procedure SetID(const Value: Integer);
     procedure SetNUMERO(const Value: string);
     procedure SetRUA(const Value: string);
-  published
+  public
     property ID: Integer read FID write SetID;
     property RUA: string read FRUA write SetRUA;
     property NUMERO: string read FNUMERO write SetNUMERO;
@@ -75,13 +79,24 @@ type
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
   end;
 
+  TTIPOPGTO = class
+  private
+    FDESCRICAO: string;
+    FID: Integer;
+    procedure SetDESCRICAO(const Value: string);
+    procedure SetID(const Value: Integer);
+  public
+    property ID: Integer read FID write SetID;
+    property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
+  end;
+
   TTIPO_CARDAPIO = class
   private
     FDESCRICAO: string;
     FID: Integer;
     procedure SetDESCRICAO(const Value: string);
     procedure SetID(const Value: Integer);
-  published
+  public
     property ID: Integer read FID write SetID;
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
   end;
@@ -98,7 +113,7 @@ type
     procedure SetID(const Value: Integer);
     procedure SetNOME(const Value: string);
     procedure SetPERCENTUAL_LUCRO(const Value: Double);
-  published
+  public
     property ID: Integer read FID write SetID;
     property NOME: string read FNOME write SetNOME;
     property ESTOQUE: Integer read FESTOQUE write SetESTOQUE;
@@ -116,7 +131,7 @@ type
     procedure SetID(const Value: Integer);
     procedure SetPRECO(const Value: Double);
     procedure SetPRODUTO(const Value: TObjectList<TPRODUTO>);
-  published
+  public
     property ID: Integer read FID write SetID;
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
     property PRECO: Double read FPRECO write SetPRECO;
@@ -130,16 +145,22 @@ type
     FID: Integer;
     FENDERECO_ENTREGA: TENDERECO;
     FDATA: TDateTime;
+    FTIPO_PAGAMENTO: TTIPOPGTO;
+    FCAIXA: TCAIXA;
     procedure SetCLIENTE(const Value: TCLIENTE);
     procedure SetDATA(const Value: TDateTime);
     procedure SetENDERECO_ENTREGA(const Value: TENDERECO);
     procedure SetID(const Value: Integer);
     procedure SetTOTAL(const Value: Double);
-  published
+    procedure SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
+    procedure SetCAIXA(const Value: TCAIXA);
+  public
     property ID: Integer read FID write SetID;
     property DATA: TDateTime read FDATA write SetDATA;
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
     property TOTAL: Double read FTOTAL write SetTOTAL;
+    property TIPO_PAGAMENTO: TTIPOPGTO read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
+    property CAIXA: TCAIXA read FCAIXA write SetCAIXA;
     property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
   end;
 
@@ -155,11 +176,28 @@ type
     procedure SetPEDIDO(const Value: TPEDIDO);
     procedure SetQUANTIDADE(const Value: Integer);
     procedure SetTOTAL(const Value: Double);
-  published
+  public
     property ID: Integer read FID write SetID;
     property PEDIDO: TPEDIDO read FPEDIDO write SetPEDIDO;
     property ITEM_CARDAPIO: TCARDAPIO read FITEM_CARDAPIO write SetITEM_CARDAPIO;
     property QUANTIDADE: Integer read FQUANTIDADE write SetQUANTIDADE;
+    property TOTAL: Double read FTOTAL write SetTOTAL;
+  end;
+
+  TCAIXA = class
+  private
+    FTOTAL: Double;
+    FABERTO: Boolean;
+    FDATA: TDate;
+    FID: Integer;
+    procedure SetABERTO(const Value: Boolean);
+    procedure SetDATA(const Value: TDate);
+    procedure SetTOTAL(const Value: Double);
+    procedure SetID(const Value: Integer);
+  public
+  property ID:Integer read FID write SetID;
+    property DATA: TDate read FDATA write SetDATA;
+    property ABERTO: Boolean read FABERTO write SetABERTO;
     property TOTAL: Double read FTOTAL write SetTOTAL;
   end;
 
@@ -280,13 +318,17 @@ begin
   FPRECO := Value;
 end;
 
-
 procedure TCARDAPIO.SetPRODUTO(const Value: TObjectList<TPRODUTO>);
 begin
   FPRODUTO := Value;
 end;
 
 { TPEDIDO }
+
+procedure TPEDIDO.SetCAIXA(const Value: TCAIXA);
+begin
+  FCAIXA := Value;
+end;
 
 procedure TPEDIDO.SetCLIENTE(const Value: TCLIENTE);
 begin
@@ -306,6 +348,11 @@ end;
 procedure TPEDIDO.SetID(const Value: Integer);
 begin
   FID := Value;
+end;
+
+procedure TPEDIDO.SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
+begin
+  FTIPO_PAGAMENTO := Value;
 end;
 
 procedure TPEDIDO.SetTOTAL(const Value: Double);
@@ -336,6 +383,40 @@ begin
 end;
 
 procedure TITEM_PEDIDO.SetTOTAL(const Value: Double);
+begin
+  FTOTAL := Value;
+end;
+
+{ TTIPOPGTO }
+
+procedure TTIPOPGTO.SetDESCRICAO(const Value: string);
+begin
+  FDESCRICAO := Value;
+end;
+
+procedure TTIPOPGTO.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+{ TCAIXA }
+
+procedure TCAIXA.SetABERTO(const Value: Boolean);
+begin
+  FABERTO := Value;
+end;
+
+procedure TCAIXA.SetDATA(const Value: TDate);
+begin
+  FDATA := Value;
+end;
+
+procedure TCAIXA.SetID(const Value: Integer);
+begin
+  FID := Value;
+end;
+
+procedure TCAIXA.SetTOTAL(const Value: Double);
 begin
   FTOTAL := Value;
 end;

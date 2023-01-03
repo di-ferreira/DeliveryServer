@@ -1,6 +1,6 @@
 describe('Rotas Tipo Cardápio', () => {
-    let id01;
-    let id02;
+    let id01:number;
+    let id02:number;
 
     it('Create Tipo Cardápio 01', () => {
         cy.request({

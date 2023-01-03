@@ -1,6 +1,6 @@
 describe('Rotas Post de Cliente', () => {
 
-    let idCliente01;
+    let idCliente01:number;
 
     it('Criar cliente - Sucesso', () => {
         cy.request({

@@ -1,36 +1,25 @@
-describe('Rotas Endereço', () => {
+describe('Rotas caixa', () => {
 
+    let idCliente01;
+    let idCliente02;
     let idEndereco01;
     let idEndereco02;
 
-    before(() => {
-        cy.request({
-            method: 'POST', url: '/clientes', body: {
-                "nome": "Priscila G. Vieira",
-                "contato": "55229785634"
-            }, failOnStatusCode: false
-        });
-    });
-
-    it('Criar Endereço - 01', () => {
+    it('Criar caixa - 01', () => {
         cy.request({
             method: 'POST',
-            url: '/clientes/55229785634/enderecos',
+            url: '/caixas',
             body: {
                 "id": 0,
-                "cliente": 4,
-                "rua": "Av. Country Clube dos Engenheiros",
-                "numero": "2042",
-                "bairro": "Clube dos Engenheiros",
-                "complemento": "Casa 120",
-                "cidade": "Araruama",
-                "estado": "RJ"
+                "total": 0.00,
+                "aberto": true
             }
         }).then((Response) => {
             expect(Response.status).to.equal(201);
-            expect(Response.body[0].message).to.equal('Endereço adicionado com sucesso!');
-            expect(Response.body[1].rua).to.equal('Av. Country Clube dos Engenheiros');
-            expect(Response.body[1].bairro).to.equal('Clube dos Engenheiros');
+            expect(Response.body[0].message).to.equal('caixa aberto com sucesso!');
+            expect(Response.body[1].total).to.equal(0.00);
+            expect(Response.body[1].data).to.equal(idCliente01);
+            expect(Response.body[1].cliente.id).to.equal(idCliente01);
             idEndereco01 = Response.body[1].id;
         });
     });

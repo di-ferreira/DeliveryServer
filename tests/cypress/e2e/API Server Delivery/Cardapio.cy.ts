@@ -1,12 +1,12 @@
 describe('Rotas Cardápio', () => {
-    let id01;
-    let id02;
-    let id03;
+    let id01:number;
+    let id02:number;
+    let id03:number;
 
-    let idproduto01;
-    let idproduto02;
-    let idproduto03;
-    let idproduto04;
+    let idproduto01:number;
+    let idproduto02:number;
+    let idproduto03:number;
+    let idproduto04:number;
 
     it('Create cardapio/produto', () => {
         cy.request({

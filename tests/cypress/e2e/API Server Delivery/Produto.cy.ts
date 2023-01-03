@@ -1,6 +1,6 @@
 describe('Rotas Produto', () => {
-    let id01;
-    let id02;
+    let id01:number;
+    let id02:number;
 
     it('Create Produto 01', () => {
         cy.request({
