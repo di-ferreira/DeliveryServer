@@ -147,6 +147,9 @@ type
     FDATA: TDateTime;
     FTIPO_PAGAMENTO: TTIPOPGTO;
     FCAIXA: TCAIXA;
+    FOBS: String;
+    FCANCELADO: Boolean;
+    FABERTO: Boolean;
     procedure SetCLIENTE(const Value: TCLIENTE);
     procedure SetDATA(const Value: TDateTime);
     procedure SetENDERECO_ENTREGA(const Value: TENDERECO);
@@ -154,11 +157,17 @@ type
     procedure SetTOTAL(const Value: Double);
     procedure SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
     procedure SetCAIXA(const Value: TCAIXA);
+    procedure SetABERTO(const Value: Boolean);
+    procedure SetCANCELADO(const Value: Boolean);
+    procedure SetOBS(const Value: String);
   public
     property ID: Integer read FID write SetID;
     property DATA: TDateTime read FDATA write SetDATA;
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
     property TOTAL: Double read FTOTAL write SetTOTAL;
+    property ABERTO:Boolean read FABERTO write SetABERTO;
+    property CANCELADO:Boolean read FCANCELADO write SetCANCELADO;
+    property OBS:String read FOBS write SetOBS;
     property TIPO_PAGAMENTO: TTIPOPGTO read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
     property CAIXA: TCAIXA read FCAIXA write SetCAIXA;
     property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
@@ -325,9 +334,19 @@ end;
 
 { TPEDIDO }
 
+procedure TPEDIDO.SetABERTO(const Value: Boolean);
+begin
+  FABERTO := Value;
+end;
+
 procedure TPEDIDO.SetCAIXA(const Value: TCAIXA);
 begin
   FCAIXA := Value;
+end;
+
+procedure TPEDIDO.SetCANCELADO(const Value: Boolean);
+begin
+  FCANCELADO := Value;
 end;
 
 procedure TPEDIDO.SetCLIENTE(const Value: TCLIENTE);
@@ -348,6 +367,11 @@ end;
 procedure TPEDIDO.SetID(const Value: Integer);
 begin
   FID := Value;
+end;
+
+procedure TPEDIDO.SetOBS(const Value: String);
+begin
+  FOBS := Value;
 end;
 
 procedure TPEDIDO.SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
