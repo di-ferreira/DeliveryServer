@@ -104,7 +104,7 @@ describe('Rotas Produto', () => {
             expect(Response.body[0].message).to.equal('Produto atualizado com sucesso!');
             expect(Response.body[1].nome).to.equal('pizza calabreza com bacon');
             expect(Response.body[1].lucro).to.equal(43.75);
-            expect(Response.body[1].id).to.equal(id01);
+            expect(Response.body[1].id).to.equal(id02);
         });
     });
 
