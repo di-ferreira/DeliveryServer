@@ -181,13 +181,37 @@ describe('Rotas Pedido', () => {
         });
     });
 
-    it('Buscar pedidos', () => {
+    it('Buscar pedidos por caixa', () => {
         cy.request(`/caixa/${idCaixa}/pedidos`)
             .then((Response) => {
                 expect(Response.status).to.equal(200);
-                expect(Response.body.contato).to.equal('55229785634');
-                expect(Response.body.enderecos[0].rua).to.equal('Av. Country Clube dos Engenheiros');
-                expect(Response.body.enderecos[1].rua).to.equal('rua Érica Reis');
+                Response.body.forEach((pedido:any) => {
+                    expect(pedido.caixa.id).to.equal(idCaixa);                    
+                });
+            });
+    });
+    
+    it('Buscar pedidos cancelados', () => {
+        cy.request(`/caixa/${idCaixa}/pedidos`)
+            .then((Response) => {
+                expect(Response.status).to.equal(200);
+                Response.body.forEach((pedido:any) => {
+                    expect(pedido.caixa.id).to.equal(idCaixa);                    
+                    expect(pedido.aberto).to.equal(false);
+                    expect(pedido.cancelado).to.equal(true);
+                });
+            });
+    });
+    
+    it('Buscar pedidos abertos', () => {
+        cy.request(`/caixa/${idCaixa}/pedidos`)
+            .then((Response) => {
+                expect(Response.status).to.equal(200);
+                Response.body.forEach((pedido: any) => {
+                    expect(pedido.caixa.id).to.equal(idCaixa);                   
+                    expect(pedido.aberto).to.equal(true);
+                    expect(pedido.cancelado).to.equal(false);                    
+                });
             });
     });
 
@@ -205,77 +229,58 @@ describe('Rotas Pedido', () => {
         });
     });
 
-    // it('Update endereço - 01', () => {
-    //     cy.request({
-    //         method: 'PUT',
-    //         url: `/clientes/55229785634/enderecos/${idEndereco01}`,
-    //         body: {
-    //             "id": 1,
-    //             "rua": "rua dos Gaúchos",
-    //             "numero": "200",
-    //             "bairro": "Vila Capri",
-    //             "complemento": "",
-    //             "cidade": "Araruama",
-    //             "estado": "RJ"
-    //         }
-    //     }).then(Response => {
-    //         expect(Response.status).to.equal(200);
-    //         expect(Response.body[0].message).to.equal('Endereço atualizado com sucesso!');
-    //         expect(Response.body[1].rua).to.equal('rua dos Gaúchos');
-    //         expect(Response.body[1].bairro).to.equal('Vila Capri');
-    //         expect(Response.body[1].cidade).to.equal('Araruama');
-    //     });
-    // });
+    it('Update pedido cancelado', () => {
+        cy.request({
+            method: 'PUT',
+            url: `/caixa/${idCaixa}/pedidos/${idPedido}`,
+            body: {
+                "id": idPedido,
+                "cancelado": true,
+                "obs":"Por que eu quis"
+            }
+        }).then(Response => {
+            expect(Response.status).to.equal(200);
+            expect(Response.body[0].message).to.equal('Pedido cancelado!');
+            expect(Response.body[1].cancelado).to.equal(true);
+            expect(Response.body[1].aberto).to.equal(false);
+        });
+    });
 
-    // it('Update endereço - 02', () => {
-    //     cy.request({
-    //         method: 'PUT',
-    //         url: `/enderecos/${idEndereco02}`,
-    //         body: {
-    //             "id": 2,
-    //             "rua": "rua Nosso Senhor do Calvário",
-    //             "numero": "69",
-    //             "bairro": "Parque Amorim",
-    //             "complemento": "",
-    //             "cidade": "Belford Roxo",
-    //             "estado": "RJ"
-    //         }
-    //     }).then(Response => {
-    //         expect(Response.status).to.equal(200);
-    //         expect(Response.body[0].message).to.equal('Endereço atualizado com sucesso!');
-    //         expect(Response.body[1].rua).to.equal('rua Nosso Senhor do Calvário');
-    //         expect(Response.body[1].bairro).to.equal('Parque Amorim');
-    //         expect(Response.body[1].cidade).to.equal('Belford Roxo');
-    //     });
-    // });
+    it('Update pedido fechar conta', () => {
+        cy.request({
+            method: 'PUT',
+            url: `/caixa/${idCaixa}/pedidos/${idPedido2}`,
+            body: {
+                "id": idPedido2,
+                "total": 0.00,
+                "aberto":true,
+                "cancelado": false,
+                "obs":"",
+                "cliente": idCliente2,
+                "endereco_entrega": idEndereco2,
+                "tipo_pagamento":  idTipoPgto2,
+                "caixa": idCaixa,
+            }
+        }).then(Response => {
+            expect(Response.status).to.equal(200);
+            expect(Response.body[0].message).to.equal('Pedido fechado!');
+            expect(Response.body[1].cancelado).to.equal(false);
+            expect(Response.body[1].aberto).to.equal(true);
+        });
+    });
 
+    after(() => {
+        cy.request({
+            method: 'DELETE',
+            url: `/clientes/${idCliente}`,
+            failOnStatusCode: false
+        });
 
-    // it('Delete endereço 01', () => {
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/clientes/55229785634/enderecos/${idEndereco01}`
-    //     }).then(Response => {
-    //         expect(Response.status).to.equal(202);
-    //         expect(Response.body.message).to.equal('Endereço excluído!');
-    //     });
-    // });
-
-    // it('Delete endereço 02', () => {
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/enderecos/${idEndereco02}`
-    //     }).then(Response => {
-    //         expect(Response.status).to.equal(202);
-    //         expect(Response.body.message).to.equal('Endereço excluído!');
-    //     });
-    // });
-
-    // after(() => {
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: '/clientes/55229785634',
-    //         failOnStatusCode: false
-    //     });
-    // });
+        cy.request({
+            method: 'DELETE',
+            url: `/clientes/${idCliente2}`,
+            failOnStatusCode: false
+        });
+    });
 
 });
