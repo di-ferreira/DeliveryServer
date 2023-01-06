@@ -7,8 +7,19 @@ describe('Rotas Pedido', () => {
     let idEndereco2: number;
     let idTipoPgto: number;
     let idTipoPgto2: number;
+    let idProduto:number;
+    let idProduto2:number;
+    let idProduto3:number;
+    let idProduto4:number;
+    let idCardapio:number;
+    let idCardapio2:number;
+    let idCardapio3:number;
     let idPedido:number;
-    let idPedido2:number;
+    let idPedido2: number;
+    let idItemPedido: number;
+    let idItemPedido2: number;
+    let idItemPedido3: number;
+    let idItemPedido4: number;
 
     before(() => {
         cy.request({
@@ -106,6 +117,60 @@ describe('Rotas Pedido', () => {
         }).then((Response) => {
             idTipoPgto2 = Response.body[1].id;
         });
+        
+        cy.request({
+            method: 'POST',
+            url: '/cardapios',
+            body: {
+                "id": 0,
+                "preco": 0.00,
+                "descricao": "x-tudo",
+                "produto": [
+                    {
+                        "id": 0,
+                        "nome": "x-tudo",
+                        "custo": 10.00,
+                        "percentual_lucro": 50.00,
+                        "estoque": 50,
+                    }
+                ],
+            },
+            failOnStatusCode: false
+        }).then((Response) => {
+            idCardapio = Response.body[1].id;
+            idProduto = Response.body[1].produto.id;
+        });
+        
+        cy.request({
+            method: 'POST',
+            url: '/cardapios',
+            body: {
+                "id": 0,
+                "preco": 20.00,
+                "descricao": "combo hot-dog",
+                "produto": [
+                    {
+                        "id": 0,
+                        "nome": "hot-dog",
+                        "custo": 5.00,
+                        "percentual_lucro": 50.00,
+                        "estoque": 50,
+                    },
+                    {
+                        "id": 0,
+                        "nome": "coca-cola",
+                        "custo": 7.00,
+                        "percentual_lucro": 25.00,
+                        "estoque": 20,
+                    }
+                ],
+            },
+            failOnStatusCode: false
+        }).then((Response) => {
+            idCardapio2 = Response.body[1].id;
+            idProduto2 = Response.body[1].produto[0].id;
+            idProduto3 = Response.body[1].produto[1].id;
+        });
     });
 
     it('Criar Pedido - 01', () => {
@@ -153,6 +218,42 @@ describe('Rotas Pedido', () => {
             expect(Response.body[1].caixa.id).to.equal(idCaixa);
             idPedido = Response.body[1].id;
         });
+    });
+
+    it('Criar Item em Pedido 01', () => {
+       cy.request({
+            method: 'POST',
+            url: `/pedidos/${idPedido}/items`,
+            body: {
+                "id": 0,
+                "item_cardapio":idCardapio,
+                "pedido": idPedido2,
+                "quantidade": 2,
+            }
+        }).then((Response) => {
+            expect(Response.status).to.equal(201);
+            expect(Response.body[0].message).to.equal('Item adicionado com sucesso!');
+            expect(Response.body[1].total.id).to.equal(Response.body[1].item_cardapio.total*Response.body[1].quantidade);
+            idItemPedido = Response.body[1].id;
+        }); 
+    });
+
+    it('Criar Item2 em Pedido 01', () => {
+       cy.request({
+            method: 'POST',
+            url: `/pedidos/${idPedido}/items`,
+            body: {
+                "id": 0,
+                "item_cardapio":idCardapio2,
+                "pedido": idPedido,
+                "quantidade": 3,
+            }
+        }).then((Response) => {
+            expect(Response.status).to.equal(201);
+            expect(Response.body[0].message).to.equal('Item adicionado com sucesso!');
+            expect(Response.body[1].total.id).to.equal(Response.body[1].item_cardapio.total*Response.body[1].quantidade);
+            idItemPedido2 = Response.body[1].id;
+        }); 
     });
 
     it('Criar Pedido - 02', () => {
