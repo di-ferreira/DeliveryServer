@@ -227,7 +227,7 @@ describe('Rotas Pedido', () => {
             body: {
                 "id": 0,
                 "item_cardapio":idCardapio,
-                "pedido": idPedido2,
+                "pedido": idPedido,
                 "quantidade": 2,
             }
         }).then((Response) => {
@@ -280,6 +280,42 @@ describe('Rotas Pedido', () => {
             expect(Response.body[1].caixa.id).to.equal(idCaixa);
             idPedido2 = Response.body[1].id;
         });
+    });
+
+    it('Criar Item em Pedido 02', () => {
+       cy.request({
+            method: 'POST',
+            url: `/pedidos/${idPedido2}/items`,
+            body: {
+                "id": 0,
+                "item_cardapio":idCardapio,
+                "pedido": idPedido2,
+                "quantidade": 3,
+            }
+        }).then((Response) => {
+            expect(Response.status).to.equal(201);
+            expect(Response.body[0].message).to.equal('Item adicionado com sucesso!');
+            expect(Response.body[1].total.id).to.equal(Response.body[1].item_cardapio.total*Response.body[1].quantidade);
+            idItemPedido3 = Response.body[1].id;
+        }); 
+    });
+
+    it('Criar Item2 em Pedido 02', () => {
+       cy.request({
+            method: 'POST',
+            url: `/pedidos/${idPedido2}/items`,
+            body: {
+                "id": 0,
+                "item_cardapio":idCardapio2,
+                "pedido": idPedido2,
+                "quantidade": 5,
+            }
+        }).then((Response) => {
+            expect(Response.status).to.equal(201);
+            expect(Response.body[0].message).to.equal('Item adicionado com sucesso!');
+            expect(Response.body[1].total.id).to.equal(Response.body[1].item_cardapio.total*Response.body[1].quantidade);
+            idItemPedido4 = Response.body[1].id;
+        }); 
     });
 
     it('Buscar pedidos por caixa', () => {
