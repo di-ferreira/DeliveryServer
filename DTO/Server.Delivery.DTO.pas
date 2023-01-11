@@ -118,7 +118,7 @@ type
     property NOME: string read FNOME write SetNOME;
     property ESTOQUE: Integer read FESTOQUE write SetESTOQUE;
     property CUSTO: Double read FCUSTO write SetCUSTO;
-    property PERCENTUAL_LUCRO: Double read FPERCENTUAL_LUCRO write SetPERCENTUAL_LUCRO;
+    property LUCRO: Double read FPERCENTUAL_LUCRO write SetPERCENTUAL_LUCRO;
   end;
 
   TCARDAPIO = class

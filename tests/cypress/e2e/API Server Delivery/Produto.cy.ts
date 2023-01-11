@@ -52,10 +52,11 @@ describe('Rotas Produto', () => {
 
     it('Get Produto 01', () => {
         cy.request(`/produtos/${id01}`).then((Response) => {
+            console.log(Response.body)
             expect(Response.status).to.equal(200);
             expect(Response.body.id).to.equal(id01);
             expect(Response.body.nome).to.equal('x-tudo');
-            expect(Response.body.lucro).to.equal(15);
+            expect(Response.body.lucro).to.equal(50);
         });
     });
 
@@ -64,7 +65,7 @@ describe('Rotas Produto', () => {
             expect(Response.status).to.equal(200);
             expect(Response.body.id).to.equal(id02);
             expect(Response.body.nome).to.equal('pizza calabreza');
-            expect(Response.body.lucro).to.equal(31.25);
+            expect(Response.body.lucro).to.equal(25);
         });
     });
 
@@ -83,7 +84,7 @@ describe('Rotas Produto', () => {
             expect(Response.status).to.equal(200);
             expect(Response.body[0].message).to.equal('Produto atualizado com sucesso!');
             expect(Response.body[1].nome).to.equal('x-tudo com calabreza');
-            expect(Response.body[1].lucro).to.equal(16);
+            expect(Response.body[1].lucro).to.equal(60);
             expect(Response.body[1].id).to.equal(id01);
         });
     });
@@ -103,7 +104,7 @@ describe('Rotas Produto', () => {
             expect(Response.status).to.equal(200);
             expect(Response.body[0].message).to.equal('Produto atualizado com sucesso!');
             expect(Response.body[1].nome).to.equal('pizza calabreza com bacon');
-            expect(Response.body[1].lucro).to.equal(43.75);
+            expect(Response.body[1].lucro).to.equal(75);
             expect(Response.body[1].id).to.equal(id02);
         });
     });

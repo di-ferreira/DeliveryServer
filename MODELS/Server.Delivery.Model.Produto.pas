@@ -55,15 +55,15 @@ begin
       ParamByName('id').Value := aID;
       ExecSQL;
       Connection.Commit;
+      Result := TJSONObject.Create;
     except
       on E: Exception do
       begin
         Connection.Rollback;
-//        ShowMessage('Erro ao excluir produto: ' + E.Message);
+        Result := TJSONObject.Create.AddPair('result', E.Message);
       end;
     end;
   end;
-  Result := TJSONObject.Create;
 end;
 
 destructor TModelServerDeliveryProduto.Destroy;
@@ -74,7 +74,7 @@ end;
 
 function TModelServerDeliveryProduto.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO FROM PRODUTOS';
+  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS';
   with FQuery do
   begin
     Close;
@@ -86,7 +86,7 @@ end;
 
 function TModelServerDeliveryProduto.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO FROM PRODUTOS WHERE ID=:ID';
+  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID';
   with FQuery do
   begin
     Close;
@@ -114,11 +114,11 @@ begin
       ParamByName('NOME').Value := aValue.NOME;
       ParamByName('ESTOQUE').Value := aValue.ESTOQUE;
       ParamByName('CUSTO').Value := aValue.CUSTO;
-      ParamByName('PERCENTUAL_LUCRO').Value := aValue.PERCENTUAL_LUCRO;
+      ParamByName('PERCENTUAL_LUCRO').Value := aValue.LUCRO;
       ExecSQL;
       Connection.Commit;
 
-      FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO FROM PRODUTOS WHERE ID=last_insert_rowid();';
+      FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=last_insert_rowid();';
 
       Close;
       SQL.Text := FSQL;
@@ -140,43 +140,39 @@ end;
 
 function TModelServerDeliveryProduto.Update(aValue: TPRODUTO): TJSONObject;
 begin
-//  FSQL := 'UPDATE PRODUTOS SET nome = :nome, preco = :preco, estoque = :estoque WHERE id = :id';
-//  with FQuery do
-//  begin
-//    Connection.StartTransaction;
-//    SQL.Text := FSQL;
-//    try
-//      try
-//        ParamByName('id').Value := aValue.ID;
-//        ParamByName('nome').Value := aValue.NOME;
-//        ParamByName('preco').Value := aValue.PRECO;
-//        ParamByName('estoque').Value := aValue.ESTOQUE;
-//        ExecSQL;
-//        Connection.Commit;
-//      except
-//        on E: Exception do
-//        begin
-//          Connection.Rollback;
-//          ShowMessage('Erro ao atualizar produto: ' + E.Message);
-//        end;
-//      end;
-//    finally
-//      FSQL := 'SELECT id, nome, preco, estoque FROM PRODUTOS WHERE id=' + aValue.ID.ToString;
-//      with FQuery do
-//      begin
-//        Close;
-//        SQL.Text := FSQL;
-//        Open;
-//
-//        FProduto.ID := FieldByName('id').AsInteger;
-//        FProduto.NOME := FieldByName('nome').AsString;
-//        FProduto.PRECO := FieldByName('preco').AsFloat;
-//        FProduto.ESTOQUE := FieldByName('estoque').AsInteger;
-//      end;
-//      Result := FProduto;
-//    end;
-//  end;
-  Result := TJSONObject.Create;
+  FSQL := 'UPDATE PRODUTOS SET nome = :nome, ESTOQUE = :ESTOQUE, CUSTO = :CUSTO, PERCENTUAL_LUCRO = :PERCENTUAL_LUCRO WHERE id = :id';
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+
+      ParamByName('id').Value := aValue.ID;
+      ParamByName('nome').Value := aValue.NOME;
+      ParamByName('ESTOQUE').Value := aValue.ESTOQUE;
+      ParamByName('CUSTO').Value := aValue.CUSTO;
+      ParamByName('PERCENTUAL_LUCRO').Value := aValue.LUCRO;
+      ExecSQL;
+      Connection.Commit;
+
+      FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID;';
+
+      Close;
+      SQL.Text := FSQL;
+      ParamByName('ID').Value := aValue.ID;
+      Open;
+    end;
+    Result := FQuery.ToJSONObject();
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
 end;
 
 end.
