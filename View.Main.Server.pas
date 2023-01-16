@@ -18,12 +18,13 @@ uses
   Horse.Compression,
   Horse.Jhonson,
   Horse.OctetStream,
+  Horse.ServerStatic,
   Vcl.StdCtrls,
   Vcl.Mask,
   Vcl.ExtCtrls,
   Vcl.AppEvnts,
   Vcl.Menus,
-  Server.Delivery.Controller.Routes, Server.Delivery.DTO;
+  Server.Delivery.Controller.Routes;
 {*)}
 
 type
@@ -103,8 +104,8 @@ end;
 
 procedure TViewMainServer.StartServer;
 begin
-  
   Server.Delivery.Controller.Routes.Registry;
+  THorse.Use(ServerStatic(''));
 
   THorse.Listen(StrToInt(EdtPorta.Text));
 
