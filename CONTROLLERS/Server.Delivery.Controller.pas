@@ -5,19 +5,22 @@ interface
 uses
   Server.Delivery.DTO, Server.Delivery.Controller.Interfaces,
   Server.Delivery.Model.Interfaces, Server.Delivery.Model.Produto,
-  Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco;
+  Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco,
+  Server.Delivery.Model.TipoCardapio;
 
 type
   TControllerServerDelivery = class(TInterfacedObject, iControllerServerDelivery)
   private
     FPRODUTO: iModelServerDelivery<TPRODUTO>;
+    FTPCARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
-    FENDERECO:  iModelServerDeliveryEndereco<TENDERECO>;
+    FENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
   public
     constructor Create;
     destructor Destroy; override;
     class function New: iControllerServerDelivery;
     function PRODUTO: iModelServerDelivery<TPRODUTO>;
+    function TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
   end;
@@ -28,7 +31,7 @@ implementation
 
 function TControllerServerDelivery.CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
 begin
-    if not Assigned(FCLIENTE) then
+  if not Assigned(FCLIENTE) then
     FCLIENTE := TModelServerDeliveryCliente.New;
 
   Result := FCLIENTE;
@@ -47,7 +50,7 @@ end;
 
 function TControllerServerDelivery.ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
 begin
-    if not Assigned(FENDERECO) then
+  if not Assigned(FENDERECO) then
     FENDERECO := TModelServerDeliveryEndereco.New;
 
   Result := FENDERECO;
@@ -64,6 +67,14 @@ begin
     FPRODUTO := TModelServerDeliveryProduto.New;
 
   Result := FPRODUTO;
+end;
+
+function TControllerServerDelivery.TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
+begin
+  if not Assigned(FTPCARDAPIO) then
+    FTPCARDAPIO := TModelServerDeliveryTipoCardapio.New;
+
+  Result := FTPCARDAPIO;
 end;
 
 end.

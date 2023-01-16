@@ -3,7 +3,7 @@ unit Server.Delivery.Controller.Interfaces;
 interface
 
 uses
-  Server.Delivery.DTO, Server.Delivery.Model.Produto,
+  Server.Delivery.DTO,
   Server.Delivery.Model.Interfaces;
 
 type
@@ -12,6 +12,7 @@ type
     function PRODUTO: iModelServerDelivery<TPRODUTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
+    function TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
   end;
 
 implementation

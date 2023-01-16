@@ -1,4 +1,4 @@
-unit Controllers.Server.Delivery.Produto.Route;
+unit Controllers.Server.Delivery.TipoCardapio.Route;
 
 interface
 {(*}
@@ -16,7 +16,7 @@ procedure Registry;
 
 implementation
 
-procedure GetProdutos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetTPCardapios(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONArray;
   lController: iControllerServerDelivery;
@@ -24,7 +24,7 @@ begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
 
-  lBody := lController.PRODUTO.GetAll;
+  lBody := lController.TIPO_CARDAPIO.GetAll;
 
   if lBody.Count > 0 then
     Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
@@ -32,7 +32,7 @@ begin
     Res.Send<TJSONArray>(lBody).Status(THTTPStatus.NoContent);
 end;
 
-procedure GetProdutoByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetTPCardapioByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
@@ -45,7 +45,7 @@ begin
   lValue := Req.Params['id'];
 
   if TryStrToInt(lValue, lID) then
-    lBody := lController.PRODUTO.GetByID(lID)
+    lBody := lController.TIPO_CARDAPIO.GetByID(lID)
   else
   begin
     Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
@@ -58,35 +58,35 @@ begin
     Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
 end;
 
-procedure CreateProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure CreateTPCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONValue;
   lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lProdutoValue: TPRODUTO;
+  lTPCardapioValue: TTIPO_CARDAPIO;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
   lController := TControllerServerDelivery.New;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
 
-  lProdutoValue := TJSON.JsonToObject<TPRODUTO>(lBody.ToJSON);
+  lTPCardapioValue := TJSON.JsonToObject<TTIPO_CARDAPIO>(lBody.ToJSON);
 
-  lResult := lController.PRODUTO.Save(lProdutoValue);
+  lResult := lController.TIPO_CARDAPIO.Save(lTPCardapioValue);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Produto adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Tipo de Cardápio adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao salvar Produto').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao salvar Tipo de Cardápio').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
-procedure UpdateProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure UpdateTPCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lProdutoFound,lProdutoBody: TPRODUTO;
+  lTPCardapioFound,lTpCardapioBody: TTIPO_CARDAPIO;
 begin
    Res.ContentType('application/json;charset=UTF-8');
 
@@ -95,7 +95,7 @@ begin
 
   if TryStrToInt(lValue, lID) then
   begin
-    lBody := lController.PRODUTO.GetByID(lID);
+    lBody := lController.TIPO_CARDAPIO.GetByID(lID);
   end
   else
   begin
@@ -103,49 +103,46 @@ begin
     exit;
   end;
 
-  lProdutoFound := TJSON.JsonToObject<TPRODUTO>(lBody);
+  lTPCardapioFound := TJSON.JsonToObject<TTIPO_CARDAPIO>(lBody);
 
-  lProdutoBody := TJSON.JsonToObject<TPRODUTO>(Req.Body);
+  lTpCardapioBody := TJSON.JsonToObject<TTIPO_CARDAPIO>(Req.Body);
 
-  lProdutoFound.NOME := lProdutoBody.NOME;
-  lProdutoFound.ESTOQUE := lProdutoBody.ESTOQUE;
-  lProdutoFound.CUSTO := lProdutoBody.CUSTO;
-  lProdutoFound.LUCRO := lProdutoBody.LUCRO;
+  lTPCardapioFound.DESCRICAO := lTpCardapioBody.DESCRICAO;
 
-  lResult := lController.PRODUTO.Update(lProdutoFound);
+  lResult := lController.TIPO_CARDAPIO.Update(lTPCardapioFound);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Produto atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Tipo de Cardápio atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar produto!').ToJSON).Status(THTTPStatus.InternalServerError);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar Tipo de Cardápio!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
-procedure DeleteProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure DeleteTPCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lProduto: TPRODUTO;
+  lTPCardapio: TTIPO_CARDAPIO;
 begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
    if TryStrToInt(lValue, lID) then
-      lBody := lController.PRODUTO.GetByID(lID);
+      lBody := lController.TIPO_CARDAPIO.GetByID(lID);
 
   if lBody.Count > 0 then
   begin
-    lProduto := TJSON.JsonToObject<TPRODUTO>(lBody);
-    lResult := lController.PRODUTO.Delete(lProduto.ID);
+    lTPCardapio := TJSON.JsonToObject<TTIPO_CARDAPIO>(lBody);
+    lResult := lController.TIPO_CARDAPIO.Delete(lTPCardapio.ID);
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('message', 'Produto excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
+      Res.Send(TJSONObject.Create.AddPair('message', 'Tipo de Cardápio excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Produto não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Tipo de Cardápio não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure Registry;
@@ -153,12 +150,12 @@ begin
 {(*}
   THorse
     .Group
-      .Prefix('produtos')
-    .Post('', CreateProduto)
-    .Get('', GetProdutos)
-    .Get(':id', GetProdutoByID)
-    .Put(':id', UpdateProduto)
-    .Delete(':id', DeleteProduto);
+      .Prefix('/cardapios/tipos')
+    .Post('', CreateTPCardapio)
+    .Get('', GetTPCardapios)
+    .Get(':id', GetTPCardapioByID)
+    .Put(':id', UpdateTPCardapio)
+    .Delete(':id', DeleteTPCardapio);
 {*)}
 end;
 

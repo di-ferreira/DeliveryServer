@@ -121,6 +121,8 @@
         <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Endereco.Route.pas"/>
         <DCCReference Include="MODELS\Server.Delivery.Model.Endereco.pas"/>
         <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Produto.Route.pas"/>
+        <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.TipoCardapio.Route.pas"/>
+        <DCCReference Include="MODELS\Server.Delivery.Model.TipoCardapio.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -29,7 +29,7 @@ describe('Rotas Tipo Cardápio', () => {
         }).then((Response) => {
             expect(Response.status).to.equal(201);
             expect(Response.body[0].message).to.equal('Tipo de Cardápio adicionado com sucesso!');
-            expect(Response.body[1].descricao).to.equal('massas');
+            expect(Response.body[1].descricao).to.equal('sanduíches');
             id02 = Response.body[1].id;
         });
     });
@@ -88,7 +88,7 @@ describe('Rotas Tipo Cardápio', () => {
             expect(Response.status).to.equal(200);
             expect(Response.body[0].message).to.equal('Tipo de Cardápio atualizado com sucesso!');
             expect(Response.body[1].descricao).to.equal('hamburgues');
-            expect(Response.body[1].id).to.equal(id01);
+            expect(Response.body[1].id).to.equal(id02);
         });
     });
 
