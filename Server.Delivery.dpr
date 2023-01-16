@@ -18,7 +18,9 @@ uses
   Server.Delivery.Model.Endereco in 'MODELS\Server.Delivery.Model.Endereco.pas',
   Controllers.Server.Delivery.Produto.Route in 'CONTROLLERS\Controllers.Server.Delivery.Produto.Route.pas',
   Controllers.Server.Delivery.TipoCardapio.Route in 'CONTROLLERS\Controllers.Server.Delivery.TipoCardapio.Route.pas',
-  Server.Delivery.Model.TipoCardapio in 'MODELS\Server.Delivery.Model.TipoCardapio.pas';
+  Server.Delivery.Model.TipoCardapio in 'MODELS\Server.Delivery.Model.TipoCardapio.pas',
+  Server.Delivery.Model.TipoPgto in 'MODELS\Server.Delivery.Model.TipoPgto.pas',
+  Controllers.Server.Delivery.TipoPgto.Route in 'CONTROLLERS\Controllers.Server.Delivery.TipoPgto.Route.pas';
 
 {$R *.res}
 

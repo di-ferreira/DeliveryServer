@@ -1,4 +1,4 @@
-unit Server.Delivery.Model.TipoCardapio;
+unit Server.Delivery.Model.TipoPgto;
 
 interface
 
@@ -17,7 +17,7 @@ uses
   Server.Delivery.SQLite.Connection;
 
 type
-  TModelServerDeliveryTipoCardapio = class(TInterfacedObject, iModelServerDelivery<TTIPO_CARDAPIO>)
+  TModelServerDeliveryTipoPgto = class(TInterfacedObject, iModelServerDelivery<TTIPOPGTO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -25,18 +25,18 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    class function New: iModelServerDelivery<TTIPO_CARDAPIO>;
-    function Save(aValue: TTIPO_CARDAPIO): TJSONObject;
+    class function New: iModelServerDelivery<TTIPOPGTO>;
+    function Save(aValue: TTIPOPGTO): TJSONObject;
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
-    function Update(aValue: TTIPO_CARDAPIO): TJSONObject;
+    function Update(aValue: TTIPOPGTO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
   end;
 
 implementation
-{ TModelServerDeliveryTipoCardapio }
+{ TModelServerDeliveryTipoPgto }
 
-constructor TModelServerDeliveryTipoCardapio.Create;
+constructor TModelServerDeliveryTipoPgto.Create;
 begin
   FConnection := TServerDeliverySQLiteConnection.New;
   FQuery := TFDQuery.Create(nil);
@@ -44,9 +44,9 @@ begin
   FConnection.Connection.TxOptions.AutoCommit := False;
 end;
 
-function TModelServerDeliveryTipoCardapio.Delete(aID: Integer): TJSONObject;
+function TModelServerDeliveryTipoPgto.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM TIPOS_CARDAPIO WHERE id = :id';
+  FSQL := 'DELETE FROM TIPOS_PAGAMENTO WHERE id = :id';
   with FQuery do
   begin
     SQL.Text := FSQL;
@@ -66,15 +66,15 @@ begin
   end;
 end;
 
-destructor TModelServerDeliveryTipoCardapio.Destroy;
+destructor TModelServerDeliveryTipoPgto.Destroy;
 begin
   FreeAndNil(FQuery);
   inherited;
 end;
 
-function TModelServerDeliveryTipoCardapio.GetAll: TJSONArray;
+function TModelServerDeliveryTipoPgto.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO';
+  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO';
   with FQuery do
   begin
     Close;
@@ -84,9 +84,9 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryTipoCardapio.GetByID(aID: Integer): TJSONObject;
+function TModelServerDeliveryTipoPgto.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO WHERE ID=:ID';
+  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO WHERE ID=:ID';
   with FQuery do
   begin
     Close;
@@ -97,14 +97,14 @@ begin
   Result := FQuery.ToJSONObject();
 end;
 
-class function TModelServerDeliveryTipoCardapio.New: iModelServerDelivery<TTIPO_CARDAPIO>;
+class function TModelServerDeliveryTipoPgto.New: iModelServerDelivery<TTIPOPGTO>;
 begin
   Result := Self.Create;
 end;
 
-function TModelServerDeliveryTipoCardapio.Save(aValue: TTIPO_CARDAPIO): TJSONObject;
+function TModelServerDeliveryTipoPgto.Save(aValue: TTIPOPGTO): TJSONObject;
 begin
-  FSQL := 'INSERT INTO TIPOS_CARDAPIO (ID, DESCRICAO) VALUES (Null, :DESCRICAO);';
+  FSQL := 'INSERT INTO TIPOS_PAGAMENTO (ID, DESCRICAO) VALUES (Null, :DESCRICAO);';
 
   try
     with FQuery do
@@ -115,7 +115,7 @@ begin
       ExecSQL;
       Connection.Commit;
 
-      FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO WHERE ID=last_insert_rowid();';
+      FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO WHERE ID=last_insert_rowid();';
 
       Close;
       SQL.Text := FSQL;
@@ -135,9 +135,9 @@ begin
   end;
 end;
 
-function TModelServerDeliveryTipoCardapio.Update(aValue: TTIPO_CARDAPIO): TJSONObject;
+function TModelServerDeliveryTipoPgto.Update(aValue: TTIPOPGTO): TJSONObject;
 begin
-  FSQL := 'UPDATE TIPOS_CARDAPIO SET DESCRICAO = :DESCRICAO WHERE id = :id';
+  FSQL := 'UPDATE TIPOS_PAGAMENTO SET DESCRICAO = :DESCRICAO WHERE id = :id';
   try
     with FQuery do
     begin
@@ -149,7 +149,7 @@ begin
       ExecSQL;
       Connection.Commit;
 
-      FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO WHERE ID=:ID;';
+      FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO WHERE ID=:ID;';
 
       Close;
       SQL.Text := FSQL;

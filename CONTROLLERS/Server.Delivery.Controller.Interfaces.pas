@@ -13,6 +13,7 @@ type
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     function TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
+    function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
   end;
 
 implementation
