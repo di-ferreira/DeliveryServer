@@ -18,7 +18,7 @@ uses
   Horse.Compression,
   Horse.Jhonson,
   Horse.OctetStream,
-  Horse.ServerStatic,
+  Horse.StaticFiles,
   Vcl.StdCtrls,
   Vcl.Mask,
   Vcl.ExtCtrls,
@@ -105,7 +105,7 @@ end;
 procedure TViewMainServer.StartServer;
 begin
   Server.Delivery.Controller.Routes.Registry;
-  THorse.Use(ServerStatic(''));
+  THorse.Use('/static', HorseStaticFile('.\public\front', ['index.html']));
 
   THorse.Listen(StrToInt(EdtPorta.Text));
 

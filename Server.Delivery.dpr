@@ -20,7 +20,9 @@ uses
   Controllers.Server.Delivery.TipoCardapio.Route in 'CONTROLLERS\Controllers.Server.Delivery.TipoCardapio.Route.pas',
   Server.Delivery.Model.TipoCardapio in 'MODELS\Server.Delivery.Model.TipoCardapio.pas',
   Server.Delivery.Model.TipoPgto in 'MODELS\Server.Delivery.Model.TipoPgto.pas',
-  Controllers.Server.Delivery.TipoPgto.Route in 'CONTROLLERS\Controllers.Server.Delivery.TipoPgto.Route.pas';
+  Controllers.Server.Delivery.TipoPgto.Route in 'CONTROLLERS\Controllers.Server.Delivery.TipoPgto.Route.pas',
+  Controllers.Server.Delivery.Cardapio.Route in 'CONTROLLERS\Controllers.Server.Delivery.Cardapio.Route.pas',
+  Server.Delivery.Model.Cardapio in 'MODELS\Server.Delivery.Model.Cardapio.pas';
 
 {$R *.res}
 
