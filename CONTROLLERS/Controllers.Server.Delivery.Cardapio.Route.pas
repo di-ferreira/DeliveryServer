@@ -167,9 +167,9 @@ begin
   lResult := lController.TIPO_PGTO.Update(lTPPgtoFound);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Tipo de Pagamento atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Cardapio atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar Tipo de Pagamento!').ToJSON).Status(THTTPStatus.InternalServerError);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar Cardapio!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
 procedure DeleteCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);
