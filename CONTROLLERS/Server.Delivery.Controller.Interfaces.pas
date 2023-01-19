@@ -13,7 +13,7 @@ type
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     function TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
     function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
-    function CARDAPIO: iModelServerDelivery<TCARDAPIO>;
+    function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
 //    function CAIXA: iModelServerDelivery<TCAIXA>;
 //    function PEDIDO: iModelServerDelivery<TPEDIDO>;
 //    function ITEM_PEDIDO: iModelServerDelivery<TITEM_PEDIDO>;

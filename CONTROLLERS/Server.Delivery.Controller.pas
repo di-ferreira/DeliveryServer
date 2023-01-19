@@ -17,7 +17,7 @@ type
     FTPPGTO: iModelServerDelivery<TTIPOPGTO>;
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     FENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
-    FCARDAPIO: iModelServerDelivery<TCARDAPIO>;
+    FCARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
   public
     constructor Create;
     destructor Destroy; override;
@@ -27,14 +27,14 @@ type
     function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
-    function CARDAPIO: iModelServerDelivery<TCARDAPIO>;
+    function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
   end;
 
 implementation
 
 { TControllerSistemaVenda }
 
-function TControllerServerDelivery.CARDAPIO: iModelServerDelivery<TCARDAPIO>;
+function TControllerServerDelivery.CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
 begin
   if not Assigned(FCARDAPIO) then
     FCARDAPIO := TModelServerDeliveryCardapio.New;

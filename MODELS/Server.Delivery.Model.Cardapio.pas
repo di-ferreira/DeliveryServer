@@ -17,7 +17,7 @@ uses
   Server.Delivery.SQLite.Connection;
 
 type
-  TModelServerDeliveryCardapio = class(TInterfacedObject, iModelServerDelivery<TCARDAPIO>)
+  TModelServerDeliveryCardapio = class(TInterfacedObject, iModelServerDeliveryCardapio<TCARDAPIO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -25,10 +25,11 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    class function New: iModelServerDelivery<TCARDAPIO>;
+    class function New: iModelServerDeliveryCardapio<TCARDAPIO>;
     function Save(aValue: TCARDAPIO): TJSONObject;
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
+    function GetByTipo(aID_TIPO: Integer): TJSONArray;
     function Update(aValue: TCARDAPIO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
   end;
@@ -46,7 +47,7 @@ end;
 
 function TModelServerDeliveryCardapio.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM TIPOS_PAGAMENTO WHERE id = :id';
+  FSQL := 'DELETE FROM CARDAPIO_PRODUTO WHERE ID_CARDAPIO = :id';
   with FQuery do
   begin
     SQL.Text := FSQL;
@@ -55,6 +56,25 @@ begin
       ParamByName('id').Value := aID;
       ExecSQL;
       Connection.Commit;
+    except
+      on E: Exception do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create.AddPair('result', E.Message);
+      end;
+    end;
+  end;
+
+  FSQL := 'DELETE FROM CARDAPIO WHERE ID = :id';
+  with FQuery do
+  begin
+    SQL.Text := FSQL;
+    Connection.StartTransaction;
+    try
+      ParamByName('id').Value := aID;
+      ExecSQL;
+      Connection.Commit;
+
       Result := TJSONObject.Create;
     except
       on E: Exception do
@@ -74,7 +94,7 @@ end;
 
 function TModelServerDeliveryCardapio.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO';
+  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO ORDER BY C.ID';
   with FQuery do
   begin
     Close;
@@ -86,7 +106,7 @@ end;
 
 function TModelServerDeliveryCardapio.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO WHERE ID=:ID';
+  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE C.ID = :ID';
   with FQuery do
   begin
     Close;
@@ -97,7 +117,20 @@ begin
   Result := FQuery.ToJSONObject();
 end;
 
-class function TModelServerDeliveryCardapio.New: iModelServerDelivery<TCARDAPIO>;
+function TModelServerDeliveryCardapio.GetByTipo(aID_TIPO: Integer): TJSONArray;
+begin
+  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE T.ID = :ID';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('ID').Value := aID_TIPO;
+    Open;
+  end;
+  Result := FQuery.ToJSONArray();
+end;
+
+class function TModelServerDeliveryCardapio.New: iModelServerDeliveryCardapio<TCARDAPIO>;
 begin
   Result := Self.Create;
 end;

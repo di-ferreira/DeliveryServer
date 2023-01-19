@@ -26,6 +26,11 @@ type
     function GetAll(aID_CLIENTE: Integer): TJSONArray; overload;
   end;
 
+  iModelServerDeliveryCardapio<T: class, constructor> = interface(iModelServerDelivery<T>)
+    ['{1834A103-1A77-450A-BFD6-89981EB9CB0D}']
+    function GetByTipo(aID_TIPO: Integer): TJSONArray;
+  end;
+
   iModelServerDeliveryConnection = interface
     ['{538D49B4-4CDE-424C-8C5E-E520F01DC628}']
     function Connection: TFDConnection;

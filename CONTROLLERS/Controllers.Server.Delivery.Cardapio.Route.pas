@@ -24,7 +24,7 @@ begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
 
-  lBody := lController.TIPO_PGTO.GetAll;
+  lBody := lController.CARDAPIO.GetAll;
 
   if lBody.Count > 0 then
     Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
@@ -45,7 +45,33 @@ begin
   lValue := Req.Params['id'];
 
   if TryStrToInt(lValue, lID) then
-    lBody := lController.TIPO_PGTO.GetByID(lID)
+    lBody := lController.CARDAPIO.GetByID(lID)
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+
+  if lBody.Count > 0 then
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
+  else
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
+end;
+
+procedure GetCardapioByTipo(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+var
+  lID: Integer;
+  lValue: string;
+  lBody: TJSONArray;
+  lController: iControllerServerDelivery;
+begin
+  Res.ContentType('application/json;charset=UTF-8');
+
+  lController := TControllerServerDelivery.New;
+  lValue := Req.Params['id'];
+
+  if TryStrToInt(lValue, lID) then
+    lBody := lController.CARDAPIO.GetByTipo(lID)
   else
   begin
     Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
@@ -152,26 +178,26 @@ var
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lTPPgto: TTIPOPGTO;
+  lCardapio: TCARDAPIO;
 begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
   if TryStrToInt(lValue, lID) then
-    lBody := lController.TIPO_PGTO.GetByID(lID);
+    lBody := lController.CARDAPIO.GetByID(lID);
 
   if lBody.Count > 0 then
   begin
-    lTPPgto := TJSON.JsonToObject<TTIPOPGTO>(lBody);
-    lResult := lController.TIPO_PGTO.Delete(lTPPgto.ID);
+    lCardapio := TJSON.JsonToObject<TCARDAPIO>(lBody);
+    lResult := lController.CARDAPIO.Delete(lCardapio.ID);
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('message', 'Tipo de Pagamento excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
+      Res.Send(TJSONObject.Create.AddPair('message', 'Cardápio excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Tipo de Pagamento não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Cardápio não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure Registry;
@@ -183,6 +209,7 @@ begin
     .Post('', CreateCardapio)
     .Get('', GetCardapios)
     .Get(':id', GetCardapioByID)
+    .Get('/tipo/:id', GetCardapioByTipo)
     .Put(':id', UpdateCardapioo)
     .Delete(':id', DeleteCardapio);
 {*)}
