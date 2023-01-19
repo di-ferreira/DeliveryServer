@@ -105,20 +105,20 @@ type
   private
     FESTOQUE: Integer;
     FID: Integer;
-    FPERCENTUAL_LUCRO: Double;
+    FLUCRO: Double;
     FNOME: string;
     FCUSTO: Double;
     procedure SetCUSTO(const Value: Double);
     procedure SetESTOQUE(const Value: Integer);
     procedure SetID(const Value: Integer);
     procedure SetNOME(const Value: string);
-    procedure SetPERCENTUAL_LUCRO(const Value: Double);
+    procedure SetLUCRO(const Value: Double);
   public
     property ID: Integer read FID write SetID;
     property NOME: string read FNOME write SetNOME;
     property ESTOQUE: Integer read FESTOQUE write SetESTOQUE;
     property CUSTO: Double read FCUSTO write SetCUSTO;
-    property LUCRO: Double read FPERCENTUAL_LUCRO write SetPERCENTUAL_LUCRO;
+    property LUCRO: Double read FLUCRO write SetLUCRO;
   end;
 
   TCARDAPIO = class
@@ -127,15 +127,17 @@ type
     FDESCRICAO: string;
     FID: Integer;
     FPRODUTO: TObjectList<TPRODUTO>;
+    FTIPO_CARDAPIO: TTIPO_CARDAPIO;
     procedure SetDESCRICAO(const Value: string);
     procedure SetID(const Value: Integer);
-    procedure SetPRECO(const Value: Double);
     procedure SetPRODUTO(const Value: TObjectList<TPRODUTO>);
+    procedure SetTIPO_CARDAPIO(const Value: TTIPO_CARDAPIO);
   public
     property ID: Integer read FID write SetID;
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
-    property PRECO: Double read FPRECO write SetPRECO;
+    property PRECO: Double read FPRECO;
     property PRODUTO: TObjectList<TPRODUTO> read FPRODUTO write SetPRODUTO;
+    property TIPO_CARDAPIO:TTIPO_CARDAPIO read FTIPO_CARDAPIO write SetTIPO_CARDAPIO;
   end;
 
   TPEDIDO = class
@@ -147,7 +149,7 @@ type
     FDATA: TDateTime;
     FTIPO_PAGAMENTO: TTIPOPGTO;
     FCAIXA: TCAIXA;
-    FOBS: String;
+    FOBS: string;
     FCANCELADO: Boolean;
     FABERTO: Boolean;
     procedure SetCLIENTE(const Value: TCLIENTE);
@@ -159,15 +161,15 @@ type
     procedure SetCAIXA(const Value: TCAIXA);
     procedure SetABERTO(const Value: Boolean);
     procedure SetCANCELADO(const Value: Boolean);
-    procedure SetOBS(const Value: String);
+    procedure SetOBS(const Value: string);
   public
     property ID: Integer read FID write SetID;
     property DATA: TDateTime read FDATA write SetDATA;
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
     property TOTAL: Double read FTOTAL write SetTOTAL;
-    property ABERTO:Boolean read FABERTO write SetABERTO;
-    property CANCELADO:Boolean read FCANCELADO write SetCANCELADO;
-    property OBS:String read FOBS write SetOBS;
+    property ABERTO: Boolean read FABERTO write SetABERTO;
+    property CANCELADO: Boolean read FCANCELADO write SetCANCELADO;
+    property OBS: string read FOBS write SetOBS;
     property TIPO_PAGAMENTO: TTIPOPGTO read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
     property CAIXA: TCAIXA read FCAIXA write SetCAIXA;
     property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
@@ -204,7 +206,7 @@ type
     procedure SetTOTAL(const Value: Double);
     procedure SetID(const Value: Integer);
   public
-  property ID:Integer read FID write SetID;
+    property ID: Integer read FID write SetID;
     property DATA: TDate read FDATA write SetDATA;
     property ABERTO: Boolean read FABERTO write SetABERTO;
     property TOTAL: Double read FTOTAL write SetTOTAL;
@@ -305,9 +307,9 @@ begin
   FNOME := Value;
 end;
 
-procedure TPRODUTO.SetPERCENTUAL_LUCRO(const Value: Double);
+procedure TPRODUTO.SetLUCRO(const Value: Double);
 begin
-  FPERCENTUAL_LUCRO := Value;
+  FLUCRO := Value;
 end;
 
 { TCARDAPIO }
@@ -322,14 +324,24 @@ begin
   FID := Value;
 end;
 
-procedure TCARDAPIO.SetPRECO(const Value: Double);
-begin
-  FPRECO := Value;
-end;
-
 procedure TCARDAPIO.SetPRODUTO(const Value: TObjectList<TPRODUTO>);
+var
+  lPRODUTO: TPRODUTO;
+  lPRECO: Double;
 begin
   FPRODUTO := Value;
+  lPRECO := 0.00;
+  for lPRODUTO in FPRODUTO do
+  begin
+    lPRECO := lPRECO + (lPRODUTO.CUSTO * lPRODUTO.FLUCRO) / 100 + lPRODUTO.CUSTO;
+  end;
+
+  FPRECO := lPRECO;
+end;
+
+procedure TCARDAPIO.SetTIPO_CARDAPIO(const Value: TTIPO_CARDAPIO);
+begin
+  FTIPO_CARDAPIO := Value;
 end;
 
 { TPEDIDO }
@@ -369,7 +381,7 @@ begin
   FID := Value;
 end;
 
-procedure TPEDIDO.SetOBS(const Value: String);
+procedure TPEDIDO.SetOBS(const Value: string);
 begin
   FOBS := Value;
 end;

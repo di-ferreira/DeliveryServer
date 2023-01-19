@@ -6,7 +6,8 @@ uses
   Server.Delivery.DTO, Server.Delivery.Controller.Interfaces,
   Server.Delivery.Model.Interfaces, Server.Delivery.Model.Produto,
   Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco,
-  Server.Delivery.Model.TipoCardapio, Server.Delivery.Model.TipoPgto;
+  Server.Delivery.Model.TipoCardapio, Server.Delivery.Model.TipoPgto,
+  Server.Delivery.Model.Cardapio;
 
 type
   TControllerServerDelivery = class(TInterfacedObject, iControllerServerDelivery)
@@ -16,6 +17,7 @@ type
     FTPPGTO: iModelServerDelivery<TTIPOPGTO>;
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     FENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
+    FCARDAPIO: iModelServerDelivery<TCARDAPIO>;
   public
     constructor Create;
     destructor Destroy; override;
@@ -25,11 +27,20 @@ type
     function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
+    function CARDAPIO: iModelServerDelivery<TCARDAPIO>;
   end;
 
 implementation
 
 { TControllerSistemaVenda }
+
+function TControllerServerDelivery.CARDAPIO: iModelServerDelivery<TCARDAPIO>;
+begin
+  if not Assigned(FCARDAPIO) then
+    FCARDAPIO := TModelServerDeliveryCardapio.New;
+
+  Result := FCARDAPIO;
+end;
 
 function TControllerServerDelivery.CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
 begin

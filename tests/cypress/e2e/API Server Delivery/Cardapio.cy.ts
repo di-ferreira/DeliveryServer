@@ -67,37 +67,6 @@ describe('Rotas Cardápio', () => {
         });
     });
 
-    it('Create cardapio/produto', () => {
-        cy.request({
-            method: 'POST',
-            url: '/cardapios',
-            body: {
-                "id": 0,
-                "preco": 0.00,
-                "descricao": "x-tudo",
-                "tipo_cardapio":idTpCardapio,
-                "produto": [
-                    {
-                        "id": 0,
-                        "nome": "x-tudo",
-                        "custo": 10.00,
-                        "percentual_lucro": 50.00,
-                        "estoque": 50,
-                    }
-                ],
-            }
-        }).then((Response) => {
-            expect(Response.status).to.equal(201);
-            expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
-            expect(Response.body[1].descricao).to.equal('x-tudo');
-            expect(Response.body[1].tipo_cardapio.id).to.equal(idTpCardapio);
-            expect(Response.body[1].preco).to.equal(15.00);
-            expect(Response.body[1].produto[0].nome).to.equal('x-tudo');
-            id01 = Response.body[1].id;
-            idproduto02 = Response.body[1].produto[0].id;
-        });
-    });
-
     it('Create cardapio/combo', () => {
         cy.request({
             method: 'POST',
@@ -135,6 +104,38 @@ describe('Rotas Cardápio', () => {
             idproduto04 = Response.body[1].produto[0].id;
         });
     });
+
+    it('Create cardapio/produto', () => {
+        cy.request({
+            method: 'POST',
+            url: '/cardapios',
+            body: {
+                "id": 0,
+                "preco": 0.00,
+                "descricao": "x-tudo",
+                "tipo_cardapio":idTpCardapio,
+                "produto": [
+                    {
+                        "id": 0,
+                        "nome": "x-tudo",
+                        "custo": 10.00,
+                        "percentual_lucro": 50.00,
+                        "estoque": 50,
+                    }
+                ],
+            }
+        }).then((Response) => {
+            expect(Response.status).to.equal(201);
+            expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
+            expect(Response.body[1].descricao).to.equal('x-tudo');
+            expect(Response.body[1].tipo_cardapio.id).to.equal(idTpCardapio);
+            expect(Response.body[1].preco).to.equal(15.00);
+            expect(Response.body[1].produto[0].nome).to.equal('x-tudo');
+            id01 = Response.body[1].id;
+            idproduto02 = Response.body[1].produto[0].id;
+        });
+    });
+
 
     it('Create cardapio/produto existente', () => {
         cy.request({
@@ -305,21 +306,36 @@ describe('Rotas Cardápio', () => {
         });
     });
 
-    after(() => {
-        cy.request({
-            method: 'DELETE',
-            url: `/produtos/${idproduto01}`,
-            failOnStatusCode: false
-        });
-        cy.request({
-            method: 'DELETE',
-            url: `/produtos/${idproduto02}`,
-            failOnStatusCode: false
-        });
-        cy.request({
-            method: 'DELETE',
-            url: `/produtos/${idproduto03}`,
-            failOnStatusCode: false
-        });
-    });
+    // after(() => {
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/produtos/${idproduto01}`,
+    //         failOnStatusCode: false
+    //     });
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/produtos/${idproduto02}`,
+    //         failOnStatusCode: false
+    //     });
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/produtos/${idproduto03}`,
+    //         failOnStatusCode: false
+    //     });
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/produtos/${idproduto04}`,
+    //         failOnStatusCode: false
+    //     });
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/cardapios/tipos/${idTpCardapio}`,
+    //         failOnStatusCode: false
+    //     });
+    //     cy.request({
+    //         method: 'DELETE',
+    //         url: `/cardapios/tipos/${idTpCardapio2}`,
+    //         failOnStatusCode: false
+    //     });
+    // });
 });

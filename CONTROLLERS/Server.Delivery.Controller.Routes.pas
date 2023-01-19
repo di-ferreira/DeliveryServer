@@ -8,7 +8,8 @@ uses
   Controllers.Server.Delivery.Endereco.Route,
   Controllers.Server.Delivery.Produto.Route,
   Controllers.Server.Delivery.TipoCardapio.Route,
-  Controllers.Server.Delivery.TipoPgto.Route;
+  Controllers.Server.Delivery.TipoPgto.Route,
+  Controllers.Server.Delivery.Cardapio.Route;
 
 procedure Registry;
 
@@ -21,6 +22,7 @@ begin
   Controllers.Server.Delivery.Produto.Route.Registry;
   Controllers.Server.Delivery.TipoCardapio.Route.Registry;
   Controllers.Server.Delivery.TipoPgto.Route.Registry;
+  Controllers.Server.Delivery.Cardapio.Route.Registry;
 end;
 
 end.

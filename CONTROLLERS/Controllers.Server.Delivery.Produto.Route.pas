@@ -64,6 +64,7 @@ var
   lResult: TJSONObject;
   lController: iControllerServerDelivery;
   lProdutoValue: TPRODUTO;
+  body:string;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
@@ -71,7 +72,8 @@ begin
   lBody := TJSONObject.ParseJSONValue(Req.Body);
 
   lProdutoValue := TJSON.JsonToObject<TPRODUTO>(lBody.ToJSON);
-
+  lProdutoValue.LUCRO := lBody.GetValue<Double>('percentual_lucro');
+   body := lBody.ToString;
   lResult := lController.PRODUTO.Save(lProdutoValue);
 
   if lResult.Count > 0 then
