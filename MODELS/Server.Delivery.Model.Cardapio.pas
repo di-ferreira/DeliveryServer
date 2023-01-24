@@ -190,20 +190,36 @@ begin
 end;
 
 function TModelServerDeliveryCardapio.Update(aValue: TCARDAPIO): TJSONObject;
+var
+  lProduto: TPRODUTO;
+  lResultPRodutos: TJSONArray;
 begin
-  FSQL := 'UPDATE TIPOS_PAGAMENTO SET DESCRICAO = :DESCRICAO WHERE id = :id';
+  FSQL := 'UPDATE CARDAPIO SET DESCRICAO = :DESCRICAO, PRECO = :PRECO, TIPO = :TIPO WHERE ID = :ID;';
   try
     with FQuery do
     begin
       Connection.StartTransaction;
       SQL.Text := FSQL;
 
-      ParamByName('id').Value := aValue.ID;
+      ParamByName('ID').Value := aValue.ID;
       ParamByName('DESCRICAO').Value := aValue.DESCRICAO;
+      ParamByName('PRECO').Value := aValue.PRECO;
+      ParamByName('TIPO').Value := aValue.TIPO_CARDAPIO.ID;
       ExecSQL;
+
+      FSQL := 'UPDATE CARDAPIO_PRODUTO SET ID_PRODUTO = :ID_PRODUTO WHERE ID_CARDAPIO = :ID_CARDAPIO;';
+
+      for lProduto in aValue.PRODUTO do
+      begin
+        SQL.Text := FSQL;
+        ParamByName('ID_PRODUTO').Value := lProduto.ID;
+        ParamByName('ID_CARDAPIO').Value := aValue.ID;
+        ExecSQL;
+      end;
+
       Connection.Commit;
 
-      FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_PAGAMENTO WHERE ID=:ID;';
+      FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE C.ID = :ID';
 
       Close;
       SQL.Text := FSQL;
