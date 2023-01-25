@@ -137,7 +137,7 @@ type
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
     property PRECO: Double read FPRECO;
     property PRODUTO: TObjectList<TPRODUTO> read FPRODUTO write SetPRODUTO;
-    property TIPO_CARDAPIO:TTIPO_CARDAPIO read FTIPO_CARDAPIO write SetTIPO_CARDAPIO;
+    property TIPO_CARDAPIO: TTIPO_CARDAPIO read FTIPO_CARDAPIO write SetTIPO_CARDAPIO;
   end;
 
   TPEDIDO = class
@@ -152,27 +152,29 @@ type
     FOBS: string;
     FCANCELADO: Boolean;
     FABERTO: Boolean;
+    FITEMS: TObjectList<TITEM_PEDIDO>;
     procedure SetCLIENTE(const Value: TCLIENTE);
     procedure SetDATA(const Value: TDateTime);
     procedure SetENDERECO_ENTREGA(const Value: TENDERECO);
     procedure SetID(const Value: Integer);
-    procedure SetTOTAL(const Value: Double);
     procedure SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
     procedure SetCAIXA(const Value: TCAIXA);
     procedure SetABERTO(const Value: Boolean);
     procedure SetCANCELADO(const Value: Boolean);
     procedure SetOBS(const Value: string);
+    procedure SetITEMS(const Value: TObjectList<TITEM_PEDIDO>);
   public
     property ID: Integer read FID write SetID;
     property DATA: TDateTime read FDATA write SetDATA;
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
-    property TOTAL: Double read FTOTAL write SetTOTAL;
+    property TOTAL: Double read FTOTAL;
     property ABERTO: Boolean read FABERTO write SetABERTO;
     property CANCELADO: Boolean read FCANCELADO write SetCANCELADO;
     property OBS: string read FOBS write SetOBS;
     property TIPO_PAGAMENTO: TTIPOPGTO read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
     property CAIXA: TCAIXA read FCAIXA write SetCAIXA;
     property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
+    property ITEMS: TObjectList<TITEM_PEDIDO> read FITEMS write SetITEMS;
   end;
 
   TITEM_PEDIDO = class
@@ -186,13 +188,12 @@ type
     procedure SetITEM_CARDAPIO(const Value: TCARDAPIO);
     procedure SetPEDIDO(const Value: TPEDIDO);
     procedure SetQUANTIDADE(const Value: Integer);
-    procedure SetTOTAL(const Value: Double);
   public
     property ID: Integer read FID write SetID;
     property PEDIDO: TPEDIDO read FPEDIDO write SetPEDIDO;
     property ITEM_CARDAPIO: TCARDAPIO read FITEM_CARDAPIO write SetITEM_CARDAPIO;
     property QUANTIDADE: Integer read FQUANTIDADE write SetQUANTIDADE;
-    property TOTAL: Double read FTOTAL write SetTOTAL;
+    property TOTAL: Double read FTOTAL;
   end;
 
   TCAIXA = class
@@ -201,15 +202,17 @@ type
     FABERTO: Boolean;
     FDATA: TDate;
     FID: Integer;
+    FPEDIDOS: TObjectList<TPEDIDO>;
     procedure SetABERTO(const Value: Boolean);
     procedure SetDATA(const Value: TDate);
-    procedure SetTOTAL(const Value: Double);
     procedure SetID(const Value: Integer);
+    procedure SetPEDIDOS(const Value: TObjectList<TPEDIDO>);
   public
     property ID: Integer read FID write SetID;
     property DATA: TDate read FDATA write SetDATA;
     property ABERTO: Boolean read FABERTO write SetABERTO;
-    property TOTAL: Double read FTOTAL write SetTOTAL;
+    property TOTAL: Double read FTOTAL;
+    property PEDIDOS: TObjectList<TPEDIDO> read FPEDIDOS write SetPEDIDOS;
   end;
 
 implementation
@@ -381,6 +384,22 @@ begin
   FID := Value;
 end;
 
+procedure TPEDIDO.SetITEMS(const Value: TObjectList<TITEM_PEDIDO>);
+var
+  lITEM: TITEM_PEDIDO;
+  lTOTAL: Double;
+begin
+  FITEMS := Value;
+  lTOTAL := 0.00;
+
+  for lITEM in FITEMS do
+  begin
+    lTOTAL := lTOTAL + lITEM.FTOTAL;
+  end;
+
+  FTOTAL := lTOTAL;
+end;
+
 procedure TPEDIDO.SetOBS(const Value: string);
 begin
   FOBS := Value;
@@ -389,11 +408,6 @@ end;
 procedure TPEDIDO.SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
 begin
   FTIPO_PAGAMENTO := Value;
-end;
-
-procedure TPEDIDO.SetTOTAL(const Value: Double);
-begin
-  FTOTAL := Value;
 end;
 
 { TITEM_PEDIDO }
@@ -406,6 +420,7 @@ end;
 procedure TITEM_PEDIDO.SetITEM_CARDAPIO(const Value: TCARDAPIO);
 begin
   FITEM_CARDAPIO := Value;
+  FTOTAL := FITEM_CARDAPIO.PRECO * FQUANTIDADE;
 end;
 
 procedure TITEM_PEDIDO.SetPEDIDO(const Value: TPEDIDO);
@@ -416,11 +431,7 @@ end;
 procedure TITEM_PEDIDO.SetQUANTIDADE(const Value: Integer);
 begin
   FQUANTIDADE := Value;
-end;
-
-procedure TITEM_PEDIDO.SetTOTAL(const Value: Double);
-begin
-  FTOTAL := Value;
+  FTOTAL := FITEM_CARDAPIO.PRECO * FQUANTIDADE;
 end;
 
 { TTIPOPGTO }
@@ -452,9 +463,20 @@ begin
   FID := Value;
 end;
 
-procedure TCAIXA.SetTOTAL(const Value: Double);
+procedure TCAIXA.SetPEDIDOS(const Value: TObjectList<TPEDIDO>);
+var
+  lPEDIDO: TPEDIDO;
+  lTOTAL: Double;
 begin
-  FTOTAL := Value;
+  FPEDIDOS := Value;
+  lTOTAL := 0.00;
+
+  for lPEDIDO in FPEDIDOS do
+  begin
+    lTOTAL := lTOTAL + lPEDIDO.FTOTAL;
+  end;
+
+  FTOTAL := lTOTAL;
 end;
 
 end.
