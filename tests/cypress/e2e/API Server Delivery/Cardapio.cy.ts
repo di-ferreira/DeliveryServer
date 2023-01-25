@@ -96,12 +96,12 @@ describe('Rotas Cardápio', () => {
             expect(Response.status).to.equal(201);
             expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
             expect(Response.body[1].descricao).to.equal('combo hot-dog');
-            expect(Response.body[1].tipo_cardapio.descricao).to.equal(descTpCardapio2);
-            expect(Response.body[1].preco).to.equal(20.00);
-            expect(Response.body[1].produto[0].nome).to.equal('hot-dog');
-            expect(Response.body[1].produto[1].nome).to.equal('coca-cola');
-            id02 = Response.body[1].id;
-            idproduto04 = Response.body[1].produto[0].id;
+            expect(Response.body[1].tipo).to.equal(descTpCardapio2);
+            expect(Response.body[1].preco).to.equal(16.25);
+            expect(Response.body[1].PRODUTOS[0].nome).to.equal('hot-dog');
+            expect(Response.body[1].PRODUTOS[1].nome).to.equal('coca-cola');
+            id01 = Response.body[1].id;
+            idproduto04 = Response.body[1].PRODUTOS[0].id;
         });
     });
 
@@ -113,7 +113,10 @@ describe('Rotas Cardápio', () => {
                 "id": 0,
                 "preco": 0.00,
                 "descricao": "x-tudo",
-                "tipo_cardapio":idTpCardapio,
+                "tipo_cardapio":{
+                    "id": idTpCardapio,
+                    "descricao":''
+                },
                 "produto": [
                     {
                         "id": 0,
@@ -128,14 +131,12 @@ describe('Rotas Cardápio', () => {
             expect(Response.status).to.equal(201);
             expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
             expect(Response.body[1].descricao).to.equal('x-tudo');
-            expect(Response.body[1].tipo_cardapio.id).to.equal(idTpCardapio);
             expect(Response.body[1].preco).to.equal(15.00);
-            expect(Response.body[1].produto[0].nome).to.equal('x-tudo');
-            id01 = Response.body[1].id;
-            idproduto02 = Response.body[1].produto[0].id;
+            expect(Response.body[1].PRODUTOS[0].nome).to.equal('x-tudo');
+            id02 = Response.body[1].id;
+            idproduto02 = Response.body[1].PRODUTOS[0].id;
         });
     });
-
 
     it('Create cardapio/produto existente', () => {
         cy.request({
@@ -145,6 +146,10 @@ describe('Rotas Cardápio', () => {
                 "id": 0,
                 "preco": 30.00,
                 "descricao": "combo x-tudo",
+                "tipo_cardapio":{
+                    "id": idTpCardapio,
+                    "descricao":''
+                },
                 "produto": [
                     {
                         "id": idproduto01,
@@ -166,9 +171,9 @@ describe('Rotas Cardápio', () => {
             expect(Response.status).to.equal(201);
             expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
             expect(Response.body[1].descricao).to.equal('combo x-tudo');
-            expect(Response.body[1].preco).to.equal(30);
-            expect(Response.body[1].produto[0].nome).to.equal('x-tudo');
-            expect(Response.body[1].produto[1].nome).to.equal('coca-cola');
+            expect(Response.body[1].preco).to.equal(23.75);
+            expect(Response.body[1].PRODUTOS[0].nome).to.equal('x-tudo');
+            expect(Response.body[1].PRODUTOS[1].nome).to.equal('coca-cola');
             id03 = Response.body[1].id;
         });
     });
@@ -177,9 +182,9 @@ describe('Rotas Cardápio', () => {
         cy.request('/cardapios').then((Response) => {
             expect(Response.status).to.equal(200);
             expect(Response.body[0].id).to.equal(id01);
-            expect(Response.body[0].descricao).to.equal('x-tudo');
+            expect(Response.body[0].descricao).to.equal('combo hot-dog');
             expect(Response.body[1].id).to.equal(id02);
-            expect(Response.body[1].descricao).to.equal('combo hot-dog');
+            expect(Response.body[1].descricao).to.equal('x-tudo');
             expect(Response.body[2].id).to.equal(id03);
             expect(Response.body[2].descricao).to.equal('combo x-tudo');
         });
@@ -189,8 +194,8 @@ describe('Rotas Cardápio', () => {
         cy.request(`/cardapios/${id01}`).then((Response) => {
             expect(Response.status).to.equal(200);
             expect(Response.body.id).to.equal(id01);
-            expect(Response.body.descricao).to.equal('x-tudo');
-            expect(Response.body.preco).to.equal(15);
+            expect(Response.body.descricao).to.equal('combo hot-dog');
+            expect(Response.body.preco).to.equal(16.25);
         });
     });
 
@@ -198,8 +203,8 @@ describe('Rotas Cardápio', () => {
         cy.request(`/cardapios/${id02}`).then((Response) => {
             expect(Response.status).to.equal(200);
             expect(Response.body.id).to.equal(id02);
-            expect(Response.body.descricao).to.equal('combo hot-dog');
-            expect(Response.body.preco).to.equal(20.00);
+            expect(Response.body.descricao).to.equal('x-tudo');
+            expect(Response.body.preco).to.equal(15);
         });
     });
 
@@ -208,7 +213,7 @@ describe('Rotas Cardápio', () => {
             expect(Response.status).to.equal(200);
             expect(Response.body.id).to.equal(id03);
             expect(Response.body.descricao).to.equal('combo x-tudo');
-            expect(Response.body.preco).to.equal(20.00);
+            expect(Response.body.preco).to.equal(23.75);
         });
     });
 
@@ -220,6 +225,10 @@ describe('Rotas Cardápio', () => {
                 "id": 0,
                 "preco": 18.00,
                 "descricao": "x-tudo",
+                "tipo_cardapio":{
+                    "id": idTpCardapio2,
+                    "descricao":''
+                },
                 "produto": [
                     {
                         "id": idproduto01,
@@ -232,10 +241,9 @@ describe('Rotas Cardápio', () => {
             }
         }).then((Response) => {
             expect(Response.status).to.equal(200);
-            expect(Response.body[0].message).to.equal('cardapio atualizado com sucesso!');
+            expect(Response.body[0].message).to.equal('Cardapio atualizado com sucesso!');
             expect(Response.body[1].descricao).to.equal('x-tudo');
-            expect(Response.body[1].preco).to.equal(18.00);
-            expect(Response.body[1].produto[0].nome).to.equal('x-tudo');
+            expect(Response.body[1].preco).to.equal(15.00);
             expect(Response.body[1].id).to.equal(id01);
         });
     });
@@ -248,6 +256,10 @@ describe('Rotas Cardápio', () => {
                 "id": 0,
                 "preco": 20.00,
                 "descricao": "combo hot-dog",
+                "tipo_cardapio":{
+                    "id": idTpCardapio2,
+                    "descricao":''
+                },
                 "produto": [
                     {
                         "id": idproduto02,
@@ -266,12 +278,10 @@ describe('Rotas Cardápio', () => {
                 ],
             }
         }).then((Response) => {
-            expect(Response.status).to.equal(201);
-            expect(Response.body[0].message).to.equal('cardapio adicionado com sucesso!');
+            expect(Response.status).to.equal(200);
+            expect(Response.body[0].message).to.equal('Cardapio atualizado com sucesso!');
             expect(Response.body[1].descricao).to.equal('combo hot-dog');
-            expect(Response.body[1].preco).to.equal(20.00);
-            expect(Response.body[1].produto[0].nome).to.equal('hot-dog');
-            expect(Response.body[1].produto[1].nome).to.equal('coca-cola');
+            expect(Response.body[1].preco).to.equal(23.75);
             expect(Response.body[1].id).to.equal(id02);
         });
     });
@@ -282,7 +292,7 @@ describe('Rotas Cardápio', () => {
             url: `/cardapios/${id01}`
         }).then((Response) => {
             expect(Response.status).to.equal(200);
-            expect(Response.body.message).to.equal('cardapio excluído com sucesso!');
+            expect(Response.body.message).to.equal('Cardápio excluído com sucesso!');
         });
     });
 
@@ -292,7 +302,7 @@ describe('Rotas Cardápio', () => {
             url: `/cardapios/${id02}`
         }).then((Response) => {
             expect(Response.status).to.equal(200);
-            expect(Response.body.message).to.equal('cardapio excluído com sucesso!');
+            expect(Response.body.message).to.equal('Cardápio excluído com sucesso!');
         });
     });
 
@@ -302,40 +312,40 @@ describe('Rotas Cardápio', () => {
             url: `/cardapios/${id03}`
         }).then((Response) => {
             expect(Response.status).to.equal(200);
-            expect(Response.body.message).to.equal('cardapio excluído com sucesso!');
+            expect(Response.body.message).to.equal('Cardápio excluído com sucesso!');
         });
     });
 
-    // after(() => {
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/produtos/${idproduto01}`,
-    //         failOnStatusCode: false
-    //     });
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/produtos/${idproduto02}`,
-    //         failOnStatusCode: false
-    //     });
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/produtos/${idproduto03}`,
-    //         failOnStatusCode: false
-    //     });
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/produtos/${idproduto04}`,
-    //         failOnStatusCode: false
-    //     });
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/cardapios/tipos/${idTpCardapio}`,
-    //         failOnStatusCode: false
-    //     });
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `/cardapios/tipos/${idTpCardapio2}`,
-    //         failOnStatusCode: false
-    //     });
-    // });
+    after(() => {
+        cy.request({
+            method: 'DELETE',
+            url: `/produtos/${idproduto01}`,
+            failOnStatusCode: false
+        });
+        cy.request({
+            method: 'DELETE',
+            url: `/produtos/${idproduto02}`,
+            failOnStatusCode: false
+        });
+        cy.request({
+            method: 'DELETE',
+            url: `/produtos/${idproduto03}`,
+            failOnStatusCode: false
+        });
+        cy.request({
+            method: 'DELETE',
+            url: `/produtos/${idproduto04}`,
+            failOnStatusCode: false
+        });
+        cy.request({
+            method: 'DELETE',
+            url: `/cardapios/tipos/${idTpCardapio}`,
+            failOnStatusCode: false
+        });
+        cy.request({
+            method: 'DELETE',
+            url: `/cardapios/tipos/${idTpCardapio2}`,
+            failOnStatusCode: false
+        });
+    });
 });

@@ -77,7 +77,7 @@ describe('Rotas Produto', () => {
                 "id": id01,
                 "nome": "x-tudo com calabreza",
                 "custo": 10.00,
-                "percentual_lucro": 60.00,
+                "lucro": 60.00,
                 "estoque": 20,
             }
         }).then((Response) => {
@@ -97,7 +97,7 @@ describe('Rotas Produto', () => {
                 "id": id02,
                 "nome": "pizza calabreza com bacon",
                 "custo": 25.00,
-                "percentual_lucro": 75.00,
+                "lucro": 75.00,
                 "estoque": 20,
             }
         }).then((Response) => {
