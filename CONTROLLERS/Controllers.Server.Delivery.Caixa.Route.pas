@@ -1,4 +1,4 @@
-unit Controllers.Server.Delivery.Cardapio.Route;
+unit Controllers.Server.Delivery.Caixa.Route;
 
 interface
 {(*}
@@ -16,7 +16,7 @@ procedure Registry;
 
 implementation
 
-procedure GetCardapios(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetCaixas(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONArray;
   lController: iControllerServerDelivery;
@@ -32,7 +32,7 @@ begin
     Res.Send<TJSONArray>(lBody).Status(THTTPStatus.NoContent);
 end;
 
-procedure GetCardapioByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetCaixaByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
@@ -58,7 +58,7 @@ begin
     Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
 end;
 
-procedure GetCardapioByTipo(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetCaixaByDate(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
@@ -84,7 +84,7 @@ begin
     Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
 end;
 
-procedure CreateCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure CreateCaixa(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONValue;
   lResult: TJSONObject;
@@ -231,11 +231,11 @@ begin
 {(*}
   THorse
     .Group
-      .Prefix('/cardapios')
-    .Post('', CreateCardapio)
-    .Get('', GetCardapios)
-    .Get(':id', GetCardapioByID)
-    .Get('/tipo/:id', GetCardapioByTipo)
+      .Prefix('/caixas')
+    .Post('', CreateCaixa)
+    .Get('', GetCaixas)
+    .Get(':id', GetCaixaByID)
+    .Get('/tipo/:id', GetCaixaByDate)
     .Put(':id', UpdateCardapio)
     .Delete(':id', DeleteCardapio);
 {*)}

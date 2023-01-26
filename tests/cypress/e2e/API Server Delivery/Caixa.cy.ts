@@ -42,7 +42,25 @@ describe('Rotas caixa', () => {
             });
     });
 
-    it('Buscar caixas abertos', () => {
+    it('Buscar caixas por data', () => {
+        cy.request('/caixas/25-01-2023')
+            .then((Response) => {
+                expect(Response.status).to.equal(200);
+                expect(Response.body.count).to.gte(1);
+                expect(Response.body.data).to.equal('25-01-2023');
+            });
+    });
+
+    it('Buscar caixas entre data', () => {
+        cy.request('/caixas?dataInicial=5-01-2023&dataFinal=27-01-2023')
+            .then((Response) => {
+                expect(Response.status).to.equal(200);
+                expect(Response.body.count).to.gte(1);
+                expect(Response.body[0].data).to.contain('01-2023');
+            });
+    });
+
+    it('Buscar caixa aberto', () => {
         cy.request('/caixas/aberto')
             .then((Response) => {
                 expect(Response.status).to.equal(200);

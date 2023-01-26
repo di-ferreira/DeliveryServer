@@ -14,7 +14,7 @@ type
     function TIPO_CARDAPIO: iModelServerDelivery<TTIPO_CARDAPIO>;
     function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
     function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
-//    function CAIXA: iModelServerDelivery<TCAIXA>;
+    function CAIXA: iModelServerDeliveryCaixa<TCAIXA>;
 //    function PEDIDO: iModelServerDelivery<TPEDIDO>;
 //    function ITEM_PEDIDO: iModelServerDelivery<TITEM_PEDIDO>;
   end;

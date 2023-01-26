@@ -9,7 +9,8 @@ uses
   Controllers.Server.Delivery.Produto.Route,
   Controllers.Server.Delivery.TipoCardapio.Route,
   Controllers.Server.Delivery.TipoPgto.Route,
-  Controllers.Server.Delivery.Cardapio.Route;
+  Controllers.Server.Delivery.Cardapio.Route,
+  Controllers.Server.Delivery.Caixa.Route;
 
 procedure Registry;
 
@@ -23,6 +24,7 @@ begin
   Controllers.Server.Delivery.TipoCardapio.Route.Registry;
   Controllers.Server.Delivery.TipoPgto.Route.Registry;
   Controllers.Server.Delivery.Cardapio.Route.Registry;
+  Controllers.Server.Delivery.Caixa.Route.Registry;
 end;
 
 end.

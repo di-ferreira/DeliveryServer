@@ -31,6 +31,12 @@ type
     function GetByTipo(aID_TIPO: Integer): TJSONArray;
   end;
 
+  iModelServerDeliveryCaixa<T: class, constructor> = interface(iModelServerDelivery<T>)
+    ['{4743CC70-21D4-4BA8-8D5B-07B22CBBDF2D}']
+    function GetByDate(aDate: TDate): TJSONObject;
+    function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
+  end;
+
   iModelServerDeliveryConnection = interface
     ['{538D49B4-4CDE-424C-8C5E-E520F01DC628}']
     function Connection: TFDConnection;

@@ -7,7 +7,7 @@ uses
   Server.Delivery.Model.Interfaces, Server.Delivery.Model.Produto,
   Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco,
   Server.Delivery.Model.TipoCardapio, Server.Delivery.Model.TipoPgto,
-  Server.Delivery.Model.Cardapio;
+  Server.Delivery.Model.Cardapio,Server.Delivery.Model.Caixa;
 
 type
   TControllerServerDelivery = class(TInterfacedObject, iControllerServerDelivery)
@@ -18,6 +18,7 @@ type
     FCLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     FENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     FCARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
+    FCAIXA: iModelServerDeliveryCaixa<TCAIXA>;
   public
     constructor Create;
     destructor Destroy; override;
@@ -28,11 +29,20 @@ type
     function CLIENTE: iModelServerDeliveryCliente<TCLIENTE>;
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
+    function CAIXA: iModelServerDeliveryCaixa<TCAIXA>;
   end;
 
 implementation
 
 { TControllerSistemaVenda }
+
+function TControllerServerDelivery.CAIXA: iModelServerDeliveryCaixa<TCAIXA>;
+begin
+  if not Assigned(FCAIXA) then
+    FCAIXA := TModelServerDeliveryCaixa.New;
+
+  Result := FCAIXA;
+end;
 
 function TControllerServerDelivery.CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
 begin
