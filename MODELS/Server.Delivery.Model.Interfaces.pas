@@ -34,7 +34,7 @@ type
   iModelServerDeliveryCaixa<T: class, constructor> = interface(iModelServerDelivery<T>)
     ['{4743CC70-21D4-4BA8-8D5B-07B22CBBDF2D}']
     function Save: TJSONObject;
-    function GetByDate(aDate: TDate): TJSONObject;
+    function GetByDate(aDate: TDate): TJSONArray;
     function GetOpen: TJSONObject;
     function CloseCaixa(aID:Integer):TJSONObject;
     function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;

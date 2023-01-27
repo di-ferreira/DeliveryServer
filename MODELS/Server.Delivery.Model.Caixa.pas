@@ -31,7 +31,7 @@ type
     function Save(aValue: TCAIXA): TJSONObject; overload;
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
-    function GetByDate(aDate: TDate): TJSONObject;
+    function GetByDate(aDate: TDate): TJSONArray;
     function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
     function GetOpen: TJSONObject;
     function CloseCaixa(aID: Integer): TJSONObject;
@@ -86,43 +86,6 @@ end;
 
 function TModelServerDeliveryCaixa.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM CARDAPIO_PRODUTO WHERE ID_CARDAPIO = :id';
-  with FQuery do
-  begin
-    SQL.Text := FSQL;
-    Connection.StartTransaction;
-    try
-      ParamByName('id').Value := aID;
-      ExecSQL;
-      Connection.Commit;
-    except
-      on E: Exception do
-      begin
-        Connection.Rollback;
-        Result := TJSONObject.Create.AddPair('result', E.Message);
-      end;
-    end;
-  end;
-
-  FSQL := 'DELETE FROM CARDAPIO WHERE ID = :id';
-  with FQuery do
-  begin
-    SQL.Text := FSQL;
-    Connection.StartTransaction;
-    try
-      ParamByName('id').Value := aID;
-      ExecSQL;
-      Connection.Commit;
-
-      Result := TJSONObject.Create;
-    except
-      on E: Exception do
-      begin
-        Connection.Rollback;
-        Result := TJSONObject.Create.AddPair('result', E.Message);
-      end;
-    end;
-  end;
 end;
 
 destructor TModelServerDeliveryCaixa.Destroy;
@@ -133,7 +96,7 @@ end;
 
 function TModelServerDeliveryCaixa.GetAll: TJSONArray;
 begin
-  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO ORDER BY C.ID';
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C';
   with FQuery do
   begin
     Close;
@@ -148,14 +111,22 @@ begin
 
 end;
 
-function TModelServerDeliveryCaixa.GetByDate(aDate: TDate): TJSONObject;
+function TModelServerDeliveryCaixa.GetByDate(aDate: TDate): TJSONArray;
 begin
-
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C."DATA" = :DATE';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('DATE').Value := aDate;
+    Open;
+  end;
+  Result := FQuery.ToJSONArray();
 end;
 
 function TModelServerDeliveryCaixa.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE C.ID = :ID';
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ID = :ID';
   with FQuery do
   begin
     Close;

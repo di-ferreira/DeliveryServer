@@ -31,12 +31,12 @@ describe('Rotas caixa', () => {
         cy.request('/caixas')
             .then((Response) => {
                 expect(Response.status).to.equal(200);
-                expect(Response.body.count).to.gte(1);
+                expect(Response.body.length).to.gte(1);
             });
     });
 
     it('Buscar caixas por data', () => {
-        cy.request('/caixas/25-01-2023')
+        cy.request('/caixas?dataCaixa=25-01-2023')
             .then((Response) => {
                 expect(Response.status).to.equal(200);
                 expect(Response.body.count).to.gte(1);
@@ -53,22 +53,6 @@ describe('Rotas caixa', () => {
             });
     });
 
-    it('Buscar caixa aberto', () => {
-        cy.request('/caixas/aberto')
-            .then((Response) => {
-                expect(Response.status).to.equal(200);
-                expect(Response.body.count).to.gte(1);
-            });
-    });
-
-    it('Buscar caixas fechados', () => {
-        cy.request('/caixas/fechados')
-            .then((Response) => {
-                expect(Response.status).to.equal(200);
-                expect(Response.body.count).to.equal(0);
-            });
-    });
-
     it('Buscar caixa por ID', () => {
         cy.request(`/caixas/${id}`).then((Response) => {
             expect(Response.status).to.equal(200);
@@ -79,15 +63,12 @@ describe('Rotas caixa', () => {
     it('Fechar caixa', () => {
         cy.request({
             method: 'PUT',
-            url: `/caixas/fechar/${id}`,
-            body: {
-                "id": id,
-                "aberto": false
-            }
+            url: `/caixas/fechar/${id}`
         }).then(Response => {
+        console.log(Response.body)
             expect(Response.status).to.equal(200);
-            expect(Response.body.id).to.equal(id);
-            expect(Response.body.aberto).to.equal(false);
+            expect(Response.body[1].id).to.equal(id);
+            expect(Response.body[1].aberto).to.equal(false);
         });
     });
 
