@@ -4,17 +4,14 @@ describe('Rotas caixa', () => {
     it('Criar caixa - 01', () => {
         cy.request({
             method: 'POST',
-            url: '/caixas',
-            body: {
-                "id": 0,
-                "total": 0.00,
-                "aberto": true
-            }
+            url: '/caixas'
         }).then((Response) => {
+            let hoje = new Date(Date.now());
+
             expect(Response.status).to.equal(201);
             expect(Response.body[0].message).to.equal('Caixa aberto com sucesso!');
             expect(Response.body[1].total).to.equal(0.00);
-            expect(Response.body[1].data).to.equal(Date.now());
+            expect(new Date(Response.body[1].dataAbertura).getDate()+1).to.equal(hoje.getDate());
             id = Response.body[1].id;
         });
     });
@@ -23,14 +20,10 @@ describe('Rotas caixa', () => {
         cy.request({
             method: 'POST',
             url: '/caixas',
-            body: {
-                "id": 0,
-                "total": 0.00,
-                "aberto": true
-            }
+            failOnStatusCode: false
         }).then((Response) => {
             expect(Response.status).to.equal(400);
-            expect(Response.body[0].message).to.equal('Caixa já está aberto!');
+            expect(Response.body.message).to.equal('Caixa já está aberto!');
         });
     });
 

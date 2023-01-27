@@ -27,17 +27,54 @@ type
     constructor Create;
     destructor Destroy; override;
     class function New: iModelServerDeliveryCaixa<TCAIXA>;
-    function Save(aValue: TCAIXA): TJSONObject;
+    function Save: TJSONObject; overload;
+    function Save(aValue: TCAIXA): TJSONObject; overload;
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
     function GetByDate(aDate: TDate): TJSONObject;
     function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
+    function GetOpen: TJSONObject;
+    function CloseCaixa(aID: Integer): TJSONObject;
     function Update(aValue: TCAIXA): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
   end;
 
 implementation
 { TModelServerDeliveryCaixa }
+
+function TModelServerDeliveryCaixa.CloseCaixa(aID: Integer): TJSONObject;
+begin
+  FSQL := 'UPDATE CAIXAS SET ABERTO=false WHERE ID=:ID;';
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+
+      ParamByName('ID').Value := aID;
+      ExecSQL;
+
+      Connection.Commit;
+
+      FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ID = :ID;';
+
+      Close;
+      SQL.Text := FSQL;
+      ParamByName('ID').Value := aID;
+      Open;
+    end;
+    Result := FQuery.ToJSONObject();
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
+end;
 
 constructor TModelServerDeliveryCaixa.Create;
 begin
@@ -106,8 +143,7 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryCaixa.GetBetweenDates(aInitalDate,
-  aFinalDate: TDate): TJSONArray;
+function TModelServerDeliveryCaixa.GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
 begin
 
 end;
@@ -143,113 +179,62 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
+function TModelServerDeliveryCaixa.GetOpen: TJSONObject;
+begin
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ABERTO = 1;';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    Open;
+  end;
+  Result := FQuery.ToJSONObject();
+end;
+
 class function TModelServerDeliveryCaixa.New: iModelServerDeliveryCaixa<TCAIXA>;
 begin
   Result := Self.Create;
 end;
 
 function TModelServerDeliveryCaixa.Save(aValue: TCAIXA): TJSONObject;
-var
-  lProduto: TPRODUTO;
-  lResultPRodutos: TJSONArray;
 begin
-//  FSQL := 'INSERT INTO CARDAPIO (ID, DESCRICAO, PRECO, TIPO) VALUES (Null, :DESCRICAO, :PRECO, :TIPO);';
-//
-//  try
-//    with FQuery do
-//    begin
-//      Connection.StartTransaction;
-//      SQL.Text := FSQL;
-//      ParamByName('DESCRICAO').Value := aValue.DESCRICAO;
-//      ParamByName('PRECO').Value := aValue.PRECO;
-//      ParamByName('TIPO').Value := aValue.TIPO_CARDAPIO.ID;
-//      ExecSQL;
-//
-//      FSQL := 'INSERT INTO CARDAPIO_PRODUTO (ID, ID_CARDAPIO, ID_PRODUTO) VALUES (Null, (SELECT ID FROM CARDAPIO ORDER BY ID DESC LIMIT 1), :ID_PRODUTO);';
-//
-//      for lProduto in aValue.PRODUTO do
-//      begin
-//        SQL.Text := FSQL;
-//        ParamByName('ID_PRODUTO').Value := lProduto.ID;
-//        ExecSQL;
-//      end;
-//
-//      FSQL := 'SELECT P.ID AS ID, P.NOME AS NOME, P.ESTOQUE AS ESTOQUE, P.CUSTO AS CUSTO, P.PERCENTUAL_LUCRO AS PERCENTUAL ' + 'FROM CARDAPIO_PRODUTO CP LEFT JOIN CARDAPIO C ON CP.ID_CARDAPIO = C.ID LEFT JOIN PRODUTOS P ON CP.ID_PRODUTO = P.ID ' + 'WHERE C.ID = (SELECT ID FROM CARDAPIO ORDER BY ID DESC LIMIT 1);';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      Open;
-//      lResultPRodutos := TJSONArray.Create;
-//      lResultPRodutos := FQuery.ToJSONArray();
-//
-//      FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO ORDER BY C.ID DESC LIMIT 1;';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      Open;
-//      Connection.Commit;
-//    end;
-//    Result := FQuery.ToJSONObject().AddPair('PRODUTOS', lResultPRodutos);
-//  except
-//    on E: Exception do
-//    begin
-//      with FQuery do
-//      begin
-//        Connection.Rollback;
-//        Result := TJSONObject.Create;
-//      end;
-//    end;
-//  end;
+
+end;
+
+function TModelServerDeliveryCaixa.Save: TJSONObject;
+begin
+  FSQL := 'INSERT INTO CAIXAS ("DATA", ABERTO, TOTAL) VALUES(CURRENT_TIMESTAMP, true, 0.00);';
+
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+      ExecSQL;
+
+      FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C ORDER BY C.ID DESC LIMIT 1;';
+
+      Close;
+      SQL.Text := FSQL;
+      Open;
+      Connection.Commit;
+    end;
+    Result := FQuery.ToJSONObject();
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
 end;
 
 function TModelServerDeliveryCaixa.Update(aValue: TCAIXA): TJSONObject;
-var
-  lProduto: TPRODUTO;
-  lResultPRodutos: TJSONArray;
 begin
-//  FSQL := 'UPDATE CARDAPIO SET DESCRICAO = :DESCRICAO, PRECO = :PRECO, TIPO = :TIPO WHERE ID = :ID;';
-//  try
-//    with FQuery do
-//    begin
-//      Connection.StartTransaction;
-//      SQL.Text := FSQL;
-//
-//      ParamByName('ID').Value := aValue.ID;
-//      ParamByName('DESCRICAO').Value := aValue.DESCRICAO;
-//      ParamByName('PRECO').Value := aValue.PRECO;
-//      ParamByName('TIPO').Value := aValue.TIPO_CARDAPIO.ID;
-//      ExecSQL;
-//
-//      FSQL := 'UPDATE CARDAPIO_PRODUTO SET ID_PRODUTO = :ID_PRODUTO WHERE ID_CARDAPIO = :ID_CARDAPIO;';
-//
-//      for lProduto in aValue.PRODUTO do
-//      begin
-//        SQL.Text := FSQL;
-//        ParamByName('ID_PRODUTO').Value := lProduto.ID;
-//        ParamByName('ID_CARDAPIO').Value := aValue.ID;
-//        ExecSQL;
-//      end;
-//
-//      Connection.Commit;
-//
-//      FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE C.ID = :ID';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      ParamByName('ID').Value := aValue.ID;
-//      Open;
-//    end;
-//    Result := FQuery.ToJSONObject();
-//  except
-//    on E: Exception do
-//    begin
-//      with FQuery do
-//      begin
-//        Connection.Rollback;
-//        Result := TJSONObject.Create;
-//      end;
-//    end;
-//  end;
+
 end;
 
 end.

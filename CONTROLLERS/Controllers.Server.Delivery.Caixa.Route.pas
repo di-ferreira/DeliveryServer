@@ -24,7 +24,7 @@ begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
 
-  lBody := lController.CARDAPIO.GetAll;
+  lBody := lController.CAIXA.GetAll;
 
   if lBody.Count > 0 then
     Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
@@ -86,53 +86,35 @@ end;
 
 procedure CreateCaixa(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
-  lBody: TJSONValue;
-  lResult: TJSONObject;
+  lResult, lSearchJSON: TJSONObject;
+  lSearch: TCAIXA;
+  lCurrentDate, lCaixaDate: string;
   lController: iControllerServerDelivery;
-  lCardapio: TCARDAPIO;
-  lProdutos: TObjectList<TPRODUTO>;
-  lProduto: TPRODUTO;
-  lProdutosJsonArray: TJSONArray;
-  lTipo: TTIPO_CARDAPIO;
-  I: Integer;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
   lController := TControllerServerDelivery.New;
-  lBody := TJSONObject.ParseJSONValue(Req.Body);
-  lProdutosJsonArray := lBody.GetValue<TJSONArray>('produto');
-  lProdutos := TObjectList<TPRODUTO>.Create;
-  lCardapio := TCARDAPIO.Create;
+  lSearchJSON := lController.CAIXA.GetOpen();
+  lSearch := TJSON.JsonToObject<TCAIXA>(lSearchJSON);
+  lSearch.DATA := lSearchJSON.GetValue<TDate>('dataAbertura');
+  lCurrentDate := FormatDateTime('yyyy/mm/dd', Date);
+  lCaixaDate := FormatDateTime('yyyy/mm/dd', lSearch.DATA);
 
-  for I := 0 to Pred(lProdutosJsonArray.Count) do
-  begin
-    if lProdutosJsonArray.Items[I].GetValue<Integer>('id') > 0 then
-      lProdutos.Add(TJSON.JsonToObject<TPRODUTO>(lController.PRODUTO.GetByID(lProdutosJsonArray.Items[I].GetValue<Integer>('id'))))
-    else
+  if Assigned(lSearch) then
+    if lCurrentDate = lCaixaDate then
     begin
-      lProduto := TPRODUTO.Create;
-      lProduto.ID := 0;
-      lProduto.NOME := lProdutosJsonArray.Items[I].GetValue<string>('nome');
-      lProduto.ESTOQUE := lProdutosJsonArray.Items[I].GetValue<Integer>('estoque');
-      lProduto.CUSTO := lProdutosJsonArray.Items[I].GetValue<Double>('custo');
-      lProduto.LUCRO := lProdutosJsonArray.Items[I].GetValue<Double>('percentual_lucro');
+      Res.Send(TJSONObject.Create.AddPair('message', 'Caixa já está aberto!').ToJSON).Status(THTTPStatus.BadRequest);
+      exit;
+    end
+    else
+      lController.CAIXA.CloseCaixa(lSearch.ID);
 
-      lProdutos.Add(TJSON.JsonToObject<TPRODUTO>(lController.PRODUTO.Save(lProduto)));
-    end;
-  end;
-
-  lTipo := TJSON.JsonToObject<TTIPO_CARDAPIO>(lBody.GetValue<TJSONObject>('tipo_cardapio'));
-  lCardapio.PRODUTO := lProdutos;
-  lCardapio.TIPO_CARDAPIO := lTipo;
-  lCardapio.ID := 0;
-  lCardapio.DESCRICAO := lBody.GetValue<string>('descricao');
-
-  lResult := lController.CARDAPIO.Save(lCardapio);
+  lResult := lController.CAIXA.Save();
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'cardapio adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Caixa aberto com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao salvar cardapio').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao abrir caixa').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
 procedure UpdateCardapio(Req: THorseRequest; Res: THorseResponse; Next: TProc);

@@ -12,7 +12,7 @@ type
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: T): TJSONObject;
-    function Delete(aID: Integer): TJSONObject; overload;
+    function Delete(aID: Integer): TJSONObject;
   end;
 
   iModelServerDeliveryCliente<T: class, constructor> = interface(iModelServerDelivery<T>)
@@ -33,7 +33,10 @@ type
 
   iModelServerDeliveryCaixa<T: class, constructor> = interface(iModelServerDelivery<T>)
     ['{4743CC70-21D4-4BA8-8D5B-07B22CBBDF2D}']
+    function Save: TJSONObject;
     function GetByDate(aDate: TDate): TJSONObject;
+    function GetOpen: TJSONObject;
+    function CloseCaixa(aID:Integer):TJSONObject;
     function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
   end;
 
