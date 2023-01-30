@@ -15,8 +15,8 @@ type
     function TIPO_PGTO: iModelServerDelivery<TTIPOPGTO>;
     function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
     function CAIXA: iModelServerDeliveryCaixa<TCAIXA>;
-//    function PEDIDO: iModelServerDelivery<TPEDIDO>;
-//    function ITEM_PEDIDO: iModelServerDelivery<TITEM_PEDIDO>;
+    function PEDIDO: iModelServerDeliveryPedido<TPEDIDO>;
+    function ITEM_PEDIDO: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
   end;
 
 implementation

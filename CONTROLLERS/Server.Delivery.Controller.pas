@@ -3,11 +3,20 @@ unit Server.Delivery.Controller;
 interface
 
 uses
-  Server.Delivery.DTO, Server.Delivery.Controller.Interfaces,
-  Server.Delivery.Model.Interfaces, Server.Delivery.Model.Produto,
-  Server.Delivery.Model.Cliente, Server.Delivery.Model.Endereco,
-  Server.Delivery.Model.TipoCardapio, Server.Delivery.Model.TipoPgto,
-  Server.Delivery.Model.Cardapio,Server.Delivery.Model.Caixa;
+{(*}
+  Server.Delivery.DTO,
+  Server.Delivery.Controller.Interfaces,
+  Server.Delivery.Model.Interfaces,
+  Server.Delivery.Model.Produto,
+  Server.Delivery.Model.Cliente,
+  Server.Delivery.Model.Endereco,
+  Server.Delivery.Model.TipoCardapio,
+  Server.Delivery.Model.TipoPgto,
+  Server.Delivery.Model.Cardapio,
+  Server.Delivery.Model.Caixa,
+  Server.Delivery.Model.Pedido,
+  Server.Delivery.Model.ItemPedido;
+  {*)}
 
 type
   TControllerServerDelivery = class(TInterfacedObject, iControllerServerDelivery)
@@ -19,6 +28,8 @@ type
     FENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     FCARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
     FCAIXA: iModelServerDeliveryCaixa<TCAIXA>;
+    FPEDIDO: iModelServerDeliveryPedido<TPEDIDO>;
+    FITEM_PEDIDO: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
   public
     constructor Create;
     destructor Destroy; override;
@@ -30,6 +41,8 @@ type
     function ENDERECO: iModelServerDeliveryEndereco<TENDERECO>;
     function CARDAPIO: iModelServerDeliveryCardapio<TCARDAPIO>;
     function CAIXA: iModelServerDeliveryCaixa<TCAIXA>;
+    function PEDIDO: iModelServerDeliveryPedido<TPEDIDO>;
+    function ITEM_PEDIDO: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
   end;
 
 implementation
@@ -79,9 +92,25 @@ begin
   Result := FENDERECO;
 end;
 
+function TControllerServerDelivery.ITEM_PEDIDO: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
+begin
+  if not Assigned(FPEDIDO) then
+    FITEM_PEDIDO := TModelServerDeliveryItemPedido.New;
+
+  Result := FITEM_PEDIDO;
+end;
+
 class function TControllerServerDelivery.New: iControllerServerDelivery;
 begin
   Result := Self.Create;
+end;
+
+function TControllerServerDelivery.PEDIDO: iModelServerDeliveryPedido<TPEDIDO>;
+begin
+  if not Assigned(FPEDIDO) then
+    FPEDIDO := TModelServerDeliveryPedido.New;
+
+  Result := FPEDIDO;
 end;
 
 function TControllerServerDelivery.PRODUTO: iModelServerDelivery<TPRODUTO>;

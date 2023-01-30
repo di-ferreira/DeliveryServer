@@ -40,6 +40,17 @@ type
     function GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
   end;
 
+  iModelServerDeliveryPedido<T: class, constructor> = interface(iModelServerDelivery<T>)
+    ['{70BE24FC-FF77-4CD3-95F3-B531526F9409}']
+    function GetByCaixa(aIDCaixa:Integer): TJSONArray;
+    function GetByCliente(aIDCliente:Integer): TJSONArray;
+  end;
+
+  iModelServerDeliveryItemPedido<T: class, constructor> = interface(iModelServerDelivery<T>)
+    ['{70BE24FC-FF77-4CD3-95F3-B531526F9409}']
+    function GetByPedido(aIDCaixa:Integer): TJSONArray;
+  end;
+
   iModelServerDeliveryConnection = interface
     ['{538D49B4-4CDE-424C-8C5E-E520F01DC628}']
     function Connection: TFDConnection;

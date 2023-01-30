@@ -25,7 +25,10 @@ uses
   Server.Delivery.Model.Cardapio in 'MODELS\Server.Delivery.Model.Cardapio.pas',
   Server.Delivery.Model.Caixa in 'MODELS\Server.Delivery.Model.Caixa.pas',
   Controllers.Server.Delivery.Caixa.Route in 'CONTROLLERS\Controllers.Server.Delivery.Caixa.Route.pas',
-  Fnc_Utils in 'UTILS\Fnc_Utils.pas';
+  Fnc_Utils in 'UTILS\Fnc_Utils.pas',
+  Server.Delivery.Model.Pedido in 'MODELS\Server.Delivery.Model.Pedido.pas',
+  Server.Delivery.Model.ItemPedido in 'MODELS\Server.Delivery.Model.ItemPedido.pas',
+  Controllers.Server.Delivery.Pedido.Route in 'CONTROLLERS\Controllers.Server.Delivery.Pedido.Route.pas';
 
 {$R *.res}
 

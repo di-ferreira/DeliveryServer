@@ -362,6 +362,9 @@ end;
 procedure TPEDIDO.SetCANCELADO(const Value: Boolean);
 begin
   FCANCELADO := Value;
+  FABERTO := TRUE;
+  if FCANCELADO then
+    FABERTO := FALSE;
 end;
 
 procedure TPEDIDO.SetCLIENTE(const Value: TCLIENTE);

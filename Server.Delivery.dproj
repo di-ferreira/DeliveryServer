@@ -130,6 +130,9 @@
         <DCCReference Include="MODELS\Server.Delivery.Model.Caixa.pas"/>
         <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Caixa.Route.pas"/>
         <DCCReference Include="UTILS\Fnc_Utils.pas"/>
+        <DCCReference Include="MODELS\Server.Delivery.Model.Pedido.pas"/>
+        <DCCReference Include="MODELS\Server.Delivery.Model.ItemPedido.pas"/>
+        <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Pedido.Route.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
