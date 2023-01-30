@@ -36,20 +36,44 @@ describe('Rotas caixa', () => {
     });
 
     it('Buscar caixas por data', () => {
-        cy.request('/caixas?dataCaixa=25-01-2023')
+        const padTo2Digits = (num: number)=> {
+                return num.toString().padStart(2, '0');
+        }
+        
+        const date = new Date();
+
+        let dt = [
+            date.getFullYear(),
+            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getDate()),
+        ].join('-');
+
+        cy.request('/caixas?dataCaixa=30-01-2023')
             .then((Response) => {
                 expect(Response.status).to.equal(200);
-                expect(Response.body.count).to.gte(1);
-                expect(Response.body.data).to.equal('25-01-2023');
+                expect(Response.body.length).to.gte(1);
+                expect(Response.body[0].dataAbertura).to.equal(dt);
             });
     });
 
     it('Buscar caixas entre data', () => {
-        cy.request('/caixas?dataInicial=5-01-2023&dataFinal=27-01-2023')
+        const padTo2Digits = (num: number)=> {
+                return num.toString().padStart(2, '0');
+        }
+        
+        const date = new Date();
+
+        let dt = [
+            date.getFullYear(),
+            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getDate()),
+        ].join('-');
+
+        cy.request('/caixas?dataInicial=27-01-2023&dataFinal=30-01-2023')
             .then((Response) => {
                 expect(Response.status).to.equal(200);
-                expect(Response.body.count).to.gte(1);
-                expect(Response.body[0].data).to.contain('01-2023');
+                expect(Response.body.length).to.gte(1);
+                expect(Response.body[0].dataAbertura).to.contain(dt);
             });
     });
 
@@ -65,7 +89,6 @@ describe('Rotas caixa', () => {
             method: 'PUT',
             url: `/caixas/fechar/${id}`
         }).then(Response => {
-        console.log(Response.body)
             expect(Response.status).to.equal(200);
             expect(Response.body[1].id).to.equal(id);
             expect(Response.body[1].aberto).to.equal(false);

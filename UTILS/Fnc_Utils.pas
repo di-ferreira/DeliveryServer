@@ -152,11 +152,13 @@ function ReturnFormatedDate(aDate, aFormat: string): TDateTime;
 var
   lDate: string;
   lDateTime: TDateTime;
+  lFormato: TFormatSettings;
 begin
   lDate := StrMultiReplace(aDate, ['-'], ['/']);
+  lFormato.ShortDateFormat := aFormat;
   lDateTime := StrToDateTime(lDate);
-  lDate := FormatDateTime('yyyy/mm/dd', lDateTime);
-  Result := StrToDateTime(lDate);
+  lDate := FormatDateTime(aFormat, lDateTime);
+  Result := StrToDateTime(lDate,lFormato);
 end;
 
 end.

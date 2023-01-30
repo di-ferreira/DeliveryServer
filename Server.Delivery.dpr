@@ -24,7 +24,8 @@ uses
   Controllers.Server.Delivery.Cardapio.Route in 'CONTROLLERS\Controllers.Server.Delivery.Cardapio.Route.pas',
   Server.Delivery.Model.Cardapio in 'MODELS\Server.Delivery.Model.Cardapio.pas',
   Server.Delivery.Model.Caixa in 'MODELS\Server.Delivery.Model.Caixa.pas',
-  Controllers.Server.Delivery.Caixa.Route in 'CONTROLLERS\Controllers.Server.Delivery.Caixa.Route.pas';
+  Controllers.Server.Delivery.Caixa.Route in 'CONTROLLERS\Controllers.Server.Delivery.Caixa.Route.pas',
+  Fnc_Utils in 'UTILS\Fnc_Utils.pas';
 
 {$R *.res}
 

@@ -108,17 +108,26 @@ end;
 
 function TModelServerDeliveryCaixa.GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
 begin
-
-end;
-
-function TModelServerDeliveryCaixa.GetByDate(aDate: TDate): TJSONArray;
-begin
-  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C."DATA" = :DATE';
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE date(C."DATA") BETWEEN date(:INICIAL_DATE) AND date(:FINAL_DATE)';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('DATE').Value := aDate;
+    ParamByName('INICIAL_DATE').Value := FormatDateTime('yyyy-mm-dd', aInitalDate);
+    ParamByName('FINAL_DATE').Value := FormatDateTime('yyyy-mm-dd', aFinalDate);
+    Open;
+  end;
+  Result := FQuery.ToJSONArray();
+end;
+
+function TModelServerDeliveryCaixa.GetByDate(aDate: TDate): TJSONArray;
+begin
+  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE date(C."DATA") = date(:DATE);';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('DATE').Value := FormatDateTime('yyyy-mm-dd', aDate);
     Open;
   end;
   Result := FQuery.ToJSONArray();

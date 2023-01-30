@@ -21,7 +21,7 @@ var
   lResult: TJSONArray;
   lQueryParams: TDictionary<string, string>;
   lController: iControllerServerDelivery;
-  lDateCaixa, lInicialDate, lFinalDate: string;
+  lDateCaixa, lInicialDate, lFinalDate: TDateTime;
   dt: TDateTime;
 begin
   Res.ContentType('application/json;charset=UTF-8');
@@ -32,16 +32,15 @@ begin
   begin
     if lQueryParams.ContainsKey('dataCaixa') then
     begin
-      lDateCaixa := lQueryParams.Items['dataCaixa'];
-      dt := ReturnFormatedDate(lDateCaixa, 'yyyy/mm/dd');
-      lResult := lController.CAIXA.GetByDate(dt);
+      lDateCaixa := ReturnFormatedDate(lQueryParams.Items['dataCaixa'], 'yyyy-mm-dd');
+      lResult := lController.CAIXA.GetByDate(lDateCaixa);
     end;
 
     if lQueryParams.ContainsKey('dataInicial') and lQueryParams.ContainsKey('dataFinal') then
     begin
-      lInicialDate := lQueryParams.Items['dataInicial'];
-      lFinalDate := lQueryParams.Items['dataFinal'];
-      lResult := lController.CAIXA.GetBetweenDates(StrToDate(lQueryParams.Items['dataInicial']), StrToDate(lQueryParams.Items['dataFinal']));
+      lInicialDate :=  ReturnFormatedDate(lQueryParams.Items['dataInicial'], 'yyyy-mm-dd');
+      lFinalDate :=  ReturnFormatedDate(lQueryParams.Items['dataFinal'], 'yyyy-mm-dd');
+      lResult := lController.CAIXA.GetBetweenDates(lInicialDate, lFinalDate);
     end;
   end
   else
@@ -141,7 +140,7 @@ begin
     if lResult.Count > 0 then
       Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Caixa fechado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
     else
-      Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar fechar caixa!').ToJSON).Status(THTTPStatus.BadRequest);
+      Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao fechar caixa!').ToJSON).Status(THTTPStatus.BadRequest);
   end
   else
   begin
