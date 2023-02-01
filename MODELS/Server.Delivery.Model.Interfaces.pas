@@ -42,6 +42,7 @@ type
 
   iModelServerDeliveryPedido<T: class, constructor> = interface(iModelServerDelivery<T>)
     ['{70BE24FC-FF77-4CD3-95F3-B531526F9409}']
+    function CreateWithItems(aValue:T):TJSONObject;
     function GetByCaixa(aIDCaixa:Integer): TJSONArray;
     function GetByCliente(aIDCliente:Integer): TJSONArray;
   end;

@@ -9,14 +9,14 @@ uses
   Rest.Json,
   Server.Delivery.Controller.Interfaces,
   Server.Delivery.Controller,
-  Server.Delivery.DTO;
+  Server.Delivery.DTO, System.Generics.Collections;
 {*)}
 
 procedure Registry;
 
 implementation
 
-procedure GetProdutos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetPedidos(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONArray;
   lController: iControllerServerDelivery;
@@ -32,7 +32,7 @@ begin
     Res.Send<TJSONArray>(lBody).Status(THTTPStatus.NoContent);
 end;
 
-procedure GetProdutoByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure GetPedidoByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
@@ -58,39 +58,99 @@ begin
     Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
 end;
 
-procedure CreateProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure CreatePedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONValue;
-  lResult: TJSONObject;
+  lResult, lClienteJSON, lEnderecoJSON, lCaixaJSON, lCardapioJSON: TJSONObject;
+  lTPPagamentoJsonArray, lItemsJsonArray: TJSONArray;
   lController: iControllerServerDelivery;
-  lProdutoValue: TPRODUTO;
-  body:string;
+  lPedido: TPEDIDO;
+  lCliente: TCLIENTE;
+  lEndereco: TENDERECO;
+  lTPPagamento: TObjectList<TTIPOPGTO>;
+  lCaixa: TCAIXA;
+  lCardapio: TCARDAPIO;
+  lItems: TObjectList<TITEM_PEDIDO>;
+  lItem: TITEM_PEDIDO;
+  I: Integer;
+  S: string;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
   lController := TControllerServerDelivery.New;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
 
-  lProdutoValue := TJSON.JsonToObject<TPRODUTO>(lBody.ToJSON);
-  lProdutoValue.LUCRO := lBody.GetValue<Double>('percentual_lucro');
-   body := lBody.ToString;
-  lResult := lController.PRODUTO.Save(lProdutoValue);
+  lClienteJSON := lBody.GetValue<TJSONObject>('cliente');
+  lCliente := TJSON.JsonToObject<TCLIENTE>(lClienteJSON);
+
+  lEnderecoJSON := lBody.GetValue<TJSONObject>('endereco_entrega');
+  lEndereco := TENDERECO.Create;
+  lEndereco.ID := lEnderecoJSON.GetValue<integer>('id');
+  lEndereco.RUA := lEnderecoJSON.GetValue<string>('rua');
+  lEndereco.NUMERO := lEnderecoJSON.GetValue<string>('numero');
+  lEndereco.BAIRRO := lEnderecoJSON.GetValue<string>('bairro');
+  lEndereco.CIDADE := lEnderecoJSON.GetValue<string>('complemento');
+  lEndereco.ESTADO := lEnderecoJSON.GetValue<string>('cidade');
+  lEndereco.COMPLEMENTO := lEnderecoJSON.GetValue<string>('estado');
+  lEndereco.CLIENTE := lCliente;
+
+  lCaixaJSON := lBody.GetValue<TJSONObject>('caixa');
+  lCaixa := TJSON.JsonToObject<TCAIXA>(lCaixaJSON);
+
+  lTPPagamentoJsonArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
+  lTPPagamento := TObjectList<TTIPOPGTO>.Create;
+  for I := 0 to Pred(lTPPagamentoJsonArray.Count) do
+    lTPPagamento.Add(TJSON.JsonToObject<TTIPOPGTO>(lController.TIPO_PGTO.GetByID(lTPPagamentoJsonArray.Items[I].GetValue<Integer>('id'))));
+
+  lPedido := TPEDIDO.Create;
+  lPedido.ID := lBody.GetValue<integer>('id');
+  lPedido.ABERTO := lBody.GetValue<Boolean>('aberto');
+  lPedido.CANCELADO := lBody.GetValue<Boolean>('cancelado');
+  lPedido.OBS := lBody.GetValue<string>('obs');
+  lPedido.CLIENTE := lCliente;
+  lPedido.ENDERECO_ENTREGA := lEndereco;
+  lPedido.TIPO_PAGAMENTO := lTPPagamento;
+  lPedido.CAIXA := lCaixa;
+
+  lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
+  lItems := TObjectList<TITEM_PEDIDO>.Create;
+
+  for I := 0 to Pred(lItemsJsonArray.Count) do
+  begin
+
+    lCardapioJSON := lItemsJsonArray.Items[I].GetValue<TJSONObject>('item_cardapio');
+    lCardapio := TJSON.JsonToObject<TCARDAPIO>(lCardapioJSON);
+    lItem := TITEM_PEDIDO.Create;
+    lItem.ID := 0;
+    lItem.PEDIDO := lPedido;
+    lItem.ITEM_CARDAPIO := lCardapio;
+    lItem.QUANTIDADE := lItemsJsonArray.Items[I].GetValue<integer>('quantidade');
+
+    lItems.Add(lItem);
+  end;
+
+  lPedido.ITEMS := lItems;
+
+  if lPedido.ITEMS.Count > 0 then
+    lResult := lController.PEDIDO.CreateWithItems(lPedido)
+  else
+    lResult := lController.PEDIDO.Save(lPedido);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Produto adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Pedido adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
   else
-    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao salvar Produto').ToJSON).Status(THTTPStatus.BadRequest);
+    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao adicionar Pedido').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
-procedure UpdateProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure UpdatePedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lProdutoFound,lProdutoBody: TPRODUTO;
+  lProdutoFound, lProdutoBody: TPRODUTO;
 begin
-   Res.ContentType('application/json;charset=UTF-8');
+  Res.ContentType('application/json;charset=UTF-8');
 
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
@@ -122,7 +182,7 @@ begin
     Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar produto!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
-procedure DeleteProduto(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure DeletePedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
@@ -134,8 +194,8 @@ begin
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
-   if TryStrToInt(lValue, lID) then
-      lBody := lController.PRODUTO.GetByID(lID);
+  if TryStrToInt(lValue, lID) then
+    lBody := lController.PRODUTO.GetByID(lID);
 
   if lBody.Count > 0 then
   begin
@@ -155,12 +215,19 @@ begin
 {(*}
   THorse
     .Group
-      .Prefix('pedidos')
-    .Post('', CreateProduto)
-    .Get('', GetProdutos)
-    .Get(':id', GetProdutoByID)
-    .Put(':id', UpdateProduto)
-    .Delete(':id', DeleteProduto);
+      .Prefix('/pedidos')
+    .Post('', CreatePedido)
+    .Get('', GetPedidos)
+    .Get(':id', GetPedidoByID)
+    .Put(':id', UpdatePedido)
+    .Delete(':id', DeletePedido);
+//    .Prefix('pedidos/:id_pedido')
+//    .Post('',CreateItem)
+//    .Get('',GetItems)
+//    .Get(':id',GetItem)
+//    .Put(':id', UpdateItem)
+//    .Delete(':id', DeleteItem)
+
 {*)}
 end;
 

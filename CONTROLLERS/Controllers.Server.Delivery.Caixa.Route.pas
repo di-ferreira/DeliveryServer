@@ -93,9 +93,9 @@ begin
 
   if lSearchJSON.Count > 0 then
   begin
-    lSearch.DATA := lSearchJSON.GetValue<TDate>('dataAbertura');
+//    lSearch.DATA := lSearchJSON.GetValue<TDate>('dataAbertura');
     lCurrentDate := FormatDateTime('yyyy/mm/dd', Date);
-    lCaixaDate := FormatDateTime('yyyy/mm/dd', lSearch.DATA);
+    lCaixaDate := FormatDateTime('yyyy/mm/dd', lSearch.DATA_ABERTURA);
 
     if lCurrentDate = lCaixaDate then
     begin

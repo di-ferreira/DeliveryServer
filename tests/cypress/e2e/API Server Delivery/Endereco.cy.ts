@@ -5,7 +5,9 @@ describe('Rotas Endereço', () => {
 
     before(() => {
         cy.request({
-            method: 'POST', url: '/clientes', body: {
+            method: 'POST',
+            url: '/clientes',
+            body: {
                 "nome": "Priscila G. Vieira",
                 "contato": "55229785634"
             }, failOnStatusCode: false

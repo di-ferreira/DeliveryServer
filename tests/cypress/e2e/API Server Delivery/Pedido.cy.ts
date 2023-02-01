@@ -173,7 +173,7 @@ describe('Rotas Pedido', () => {
         });
     });
 
-    it('Criar Pedido - 01', () => {
+    it('Criar Pedido - completo', () => {
         cy.request({
             method: 'POST',
             url: '/pedidos',

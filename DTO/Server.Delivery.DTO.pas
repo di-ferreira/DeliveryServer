@@ -3,7 +3,7 @@ unit Server.Delivery.DTO;
 interface
 
 uses
-  System.Generics.Collections;
+  System.Generics.Collections, System.SysUtils;
 
 { (* }
 // - [ ]  Cliente
@@ -147,17 +147,16 @@ type
     FID: Integer;
     FENDERECO_ENTREGA: TENDERECO;
     FDATA: TDateTime;
-    FTIPO_PAGAMENTO: TTIPOPGTO;
+    FTIPO_PAGAMENTO: TObjectList<TTIPOPGTO>;
     FCAIXA: TCAIXA;
     FOBS: string;
     FCANCELADO: Boolean;
     FABERTO: Boolean;
     FITEMS: TObjectList<TITEM_PEDIDO>;
     procedure SetCLIENTE(const Value: TCLIENTE);
-    procedure SetDATA(const Value: TDateTime);
     procedure SetENDERECO_ENTREGA(const Value: TENDERECO);
     procedure SetID(const Value: Integer);
-    procedure SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
+    procedure SetTIPO_PAGAMENTO(const Value: TObjectList<TTIPOPGTO>);
     procedure SetCAIXA(const Value: TCAIXA);
     procedure SetABERTO(const Value: Boolean);
     procedure SetCANCELADO(const Value: Boolean);
@@ -165,13 +164,13 @@ type
     procedure SetITEMS(const Value: TObjectList<TITEM_PEDIDO>);
   public
     property ID: Integer read FID write SetID;
-    property DATA: TDateTime read FDATA write SetDATA;
+    property DATA: TDateTime read FDATA;
     property CLIENTE: TCLIENTE read FCLIENTE write SetCLIENTE;
     property TOTAL: Double read FTOTAL;
     property ABERTO: Boolean read FABERTO write SetABERTO;
     property CANCELADO: Boolean read FCANCELADO write SetCANCELADO;
     property OBS: string read FOBS write SetOBS;
-    property TIPO_PAGAMENTO: TTIPOPGTO read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
+    property TIPO_PAGAMENTO: TObjectList<TTIPOPGTO> read FTIPO_PAGAMENTO write SetTIPO_PAGAMENTO;
     property CAIXA: TCAIXA read FCAIXA write SetCAIXA;
     property ENDERECO_ENTREGA: TENDERECO read FENDERECO_ENTREGA write SetENDERECO_ENTREGA;
     property ITEMS: TObjectList<TITEM_PEDIDO> read FITEMS write SetITEMS;
@@ -204,12 +203,11 @@ type
     FID: Integer;
     FPEDIDOS: TObjectList<TPEDIDO>;
     procedure SetABERTO(const Value: Boolean);
-    procedure SetDATA(const Value: TDate);
     procedure SetID(const Value: Integer);
     procedure SetPEDIDOS(const Value: TObjectList<TPEDIDO>);
   public
     property ID: Integer read FID write SetID;
-    property DATA: TDate read FDATA write SetDATA;
+    property DATA_ABERTURA: TDate read FDATA;
     property ABERTO: Boolean read FABERTO write SetABERTO;
     property TOTAL: Double read FTOTAL;
     property PEDIDOS: TObjectList<TPEDIDO> read FPEDIDOS write SetPEDIDOS;
@@ -370,11 +368,7 @@ end;
 procedure TPEDIDO.SetCLIENTE(const Value: TCLIENTE);
 begin
   FCLIENTE := Value;
-end;
-
-procedure TPEDIDO.SetDATA(const Value: TDateTime);
-begin
-  FDATA := Value;
+  FDATA := Date();
 end;
 
 procedure TPEDIDO.SetENDERECO_ENTREGA(const Value: TENDERECO);
@@ -408,7 +402,7 @@ begin
   FOBS := Value;
 end;
 
-procedure TPEDIDO.SetTIPO_PAGAMENTO(const Value: TTIPOPGTO);
+procedure TPEDIDO.SetTIPO_PAGAMENTO(const Value: TObjectList<TTIPOPGTO>);
 begin
   FTIPO_PAGAMENTO := Value;
 end;
@@ -454,11 +448,7 @@ end;
 procedure TCAIXA.SetABERTO(const Value: Boolean);
 begin
   FABERTO := Value;
-end;
-
-procedure TCAIXA.SetDATA(const Value: TDate);
-begin
-  FDATA := Value;
+  FDATA := Date();
 end;
 
 procedure TCAIXA.SetID(const Value: Integer);

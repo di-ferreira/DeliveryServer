@@ -26,6 +26,7 @@ begin
   Controllers.Server.Delivery.TipoPgto.Route.Registry;
   Controllers.Server.Delivery.Cardapio.Route.Registry;
   Controllers.Server.Delivery.Caixa.Route.Registry;
+  Controllers.Server.Delivery.Pedido.Route.Registry;
 end;
 
 end.

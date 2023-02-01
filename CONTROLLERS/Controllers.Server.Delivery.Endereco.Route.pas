@@ -85,6 +85,8 @@ var
   lBody: TJSONValue;
   lResult: TJSONObject;
   lController: iControllerServerDelivery;
+  lClienteIDStr:string;
+  lClienteID:Integer;
   lCliente: TCLIENTE;
   lEnderecoValue: TENDERECO;
 begin
@@ -92,7 +94,17 @@ begin
   lController := TControllerServerDelivery.New;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
   lEnderecoValue := TENDERECO.Create;
-  lCliente := TJSON.JsonToObject<TCLIENTE>(lController.CLIENTE.GetByContato(Req.Params['id_cliente']));
+
+  lClienteIDStr := Req.Params['id_cliente'];
+
+  if lClienteIDStr.Length < 10 then
+  begin
+    if TryStrToInt(lClienteIDStr, lClienteID) then
+      lCliente := TJSON.JsonToObject<TCLIENTE>(lController.CLIENTE.GetByID(lClienteID));
+  end
+  else
+    lCliente := TJSON.JsonToObject<TCLIENTE>(lController.CLIENTE.GetByContato(lClienteIDStr));
+
   lEnderecoValue.CLIENTE := lCliente;
   lEnderecoValue.ID := lBody.GetValue<integer>('id');
   lEnderecoValue.RUA := lBody.GetValue<string>('rua');
