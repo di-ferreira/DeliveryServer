@@ -24,7 +24,7 @@ begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
 
-  lBody := lController.PRODUTO.GetAll;
+  lBody := lController.PEDIDO.GetAll;
 
   if lBody.Count > 0 then
     Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
@@ -213,15 +213,18 @@ begin
       .Prefix('/pedidos')
     .Post('', CreatePedido)
     .Get('', GetPedidos)
-    .Get(':id', GetPedidoByID)
-    .Put(':id', UpdatePedido)
-    .Delete(':id', DeletePedido);
-//    .Prefix('pedidos/:id_pedido')
-//    .Post('',CreateItem)
-//    .Get('',GetItems)
-//    .Get(':id',GetItem)
+    .Get(':id', GetPedidoByID);
+//    .Put(':id', CancelarPedido)
+//    .Put(':id', FecharPedido);
+//
+//  THorse
+//    .Group
+//      .Prefix('pedidos/:id_pedido/item')
+//    .Post('', AddItem)
+//    .Get(':id', GetItemByID)
+//    .Get(':id', GetItem)
 //    .Put(':id', UpdateItem)
-//    .Delete(':id', DeleteItem)
+//    .Delete(':id', DeleteItem);
 
 {*)}
 end;

@@ -31,10 +31,14 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: TITEM_PEDIDO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
-    function GetByPedido(aIDCaixa:Integer): TJSONArray;
+    function GetByPedido(aIDPedido: Integer): TJSONArray;
   end;
 
 implementation
+
+uses
+  Server.Delivery.Controller.Interfaces, Server.Delivery.Controller;
+
 { TModelServerDeliveryItemPedido }
 
 constructor TModelServerDeliveryItemPedido.Create;
@@ -98,10 +102,49 @@ begin
   Result := FQuery.ToJSONObject();
 end;
 
-function TModelServerDeliveryItemPedido.GetByPedido(
-  aIDCaixa: Integer): TJSONArray;
+function TModelServerDeliveryItemPedido.GetByPedido(aIDPedido: Integer): TJSONArray;
+var
+  lItems, lItemsResult: TJSONArray;
+  lItem: TJSONObject;
+  lController: iControllerServerDelivery;
+  I: Integer;
 begin
+  FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO WHERE PEDIDO = :PEDIDO ;';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('PEDIDO').Value := aIDPedido;
+    Open;
+  end;
 
+//  lItems :=   TJSONArray.Create;
+//  lItemsResult :=   TJSONArray.Create;
+//
+//  lItems := FQuery.ToJSONArray();
+//
+//  lController := TControllerServerDelivery.New;
+//
+//  lItemsResult := TJSONArray.Create;
+//
+//  for I := 0 to Pred(lItems.Count) do
+//  begin
+//    lItem := TJSONObject.Create;
+//    lItem.AddPair('id', lItems.Items[I].GetValue<integer>('id'));
+//    lItem.AddPair('total', lItems.Items[I].GetValue<Double>('total'));
+//    lItem.AddPair('quantidade', lItems.Items[I].GetValue<integer>('quantidade'));
+//    lItem.AddPair('itemCardapio', lController.CARDAPIO.GetByTipo(lItems.Items[I].GetValue<integer>('itemCardapio')));
+//
+//    lItemsResult.Add(lItem);
+//  end;
+
+//      SQL.Clear;
+//      FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO WHERE  PEDIDO = :PEDIDO;';
+//      SQL.Text := FSQL;
+//      ParamByName('PEDIDO').Value := PedidoJSONSearch.Items[I].GetValue<integer>('id');
+//      Open;
+//      lItemsJSONSearch := FQuery.ToJSONArray();
+  Result := FQuery.ToJSONArray();
 end;
 
 class function TModelServerDeliveryItemPedido.New: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
