@@ -37,6 +37,9 @@ type
   end;
 
 implementation
+
+uses
+  Server.Delivery.Controller.Interfaces, Server.Delivery.Controller;
 { TModelServerDeliveryPedido }
 
 constructor TModelServerDeliveryPedido.Create;
@@ -49,8 +52,26 @@ end;
 
 function TModelServerDeliveryPedido.CreateWithItems(aValue: TPEDIDO): TJSONObject;
 var
-  CaixaJSON, ClienteJSON, EnderecoJSON, PedidoJSON, PedidoResultJSON: TJSONObject;
+  CaixaJSON,
+  ClienteJSON,
+  EnderecoJSON,
+  PedidoJSON,
+  PedidoResultJSON,
+  lItemJSON: TJSONObject;
+  lItem: TITEM_PEDIDO;
+  lItemsJSONResult: TJSONArray;
+  lController: iControllerServerDelivery;
 begin
+  lController := TControllerServerDelivery.New;
+
+  CaixaJSON := TJSONObject.Create;
+  ClienteJSON := TJSONObject.Create;
+  EnderecoJSON := TJSONObject.Create;
+  PedidoJSON := TJSONObject.Create;
+  PedidoResultJSON := TJSONObject.Create;
+
+  CaixaJSON := lController.CAIXA.GetOpen;
+
   FSQL := 'INSERT INTO PEDIDOS ("DATA", TOTAL, CANCELADO, ABERTO, OBS, CAIXA, CLIENTE, ENDERECO_ENTREGA) VALUES(CURRENT_TIMESTAMP, :TOTAL, :CANCELADO, :ABERTO, :OBS, :CAIXA, :CLIENTE, :ENDERECO_ENTREGA);';
 
   try
@@ -62,16 +83,39 @@ begin
       ParamByName('CANCELADO').Value := aValue.CANCELADO;
       ParamByName('ABERTO').Value := aValue.ABERTO;
       ParamByName('OBS').Value := aValue.OBS;
-      ParamByName('CAIXA').Value := aValue.CAIXA.ID;
+      ParamByName('CAIXA').Value := CaixaJSON.GetValue<integer>('id');
       ParamByName('CLIENTE').Value := aValue.CLIENTE.ID;
       ParamByName('ENDERECO_ENTREGA').Value := aValue.ENDERECO_ENTREGA.ID;
       ExecSQL;
 
-      CaixaJSON := TJSONObject.Create;
-      ClienteJSON := TJSONObject.Create;
-      EnderecoJSON := TJSONObject.Create;
-      PedidoJSON := TJSONObject.Create;
-      PedidoResultJSON := TJSONObject.Create;
+      lItemsJSONResult := TJSONArray.Create;
+
+      for lItem in aValue.ITEMS do
+      begin
+        SQL.Clear;
+        FSQL := 'INSERT INTO ITEMS_PEDIDO (TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO) VALUES (:TOTAL, :QUANTIDADE, :ITEM_CARDAPIO, (SELECT ID FROM PEDIDOS ORDER BY ID DESC LIMIT 1));';
+        SQL.Text := FSQL;
+        ParamByName('TOTAL').AsCurrency := lItem.TOTAL;
+        ParamByName('QUANTIDADE').AsInteger := lItem.QUANTIDADE;
+        ParamByName('ITEM_CARDAPIO').AsInteger := lItem.ITEM_CARDAPIO.ID;
+        ExecSQL;
+
+        Close;
+        SQL.Clear;
+        FSQL := 'SELECT ID FROM ITEMS_PEDIDO ORDER BY ID DESC LIMIT 1;';
+        SQL.Text := FSQL;
+        Open;
+
+        lItemJSON := TJSONObject.Create;
+        lItemJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
+        lItemJSON.AddPair('total', lItem.TOTAL);
+        lItemJSON.AddPair('quantidade', lItem.QUANTIDADE);
+        lItemJSON.AddPair('itemCardapio', lController.CARDAPIO.GetByID(lItem.ITEM_CARDAPIO.ID));
+
+        lItemsJSONResult.Add(lItemJSON);
+      end;
+
+      Connection.Commit;
 
       FSQL := 'SELECT ID, "DATA" AS DATA_PEDIDO, TOTAL, CANCELADO, ABERTO, OBS, CAIXA, CLIENTE, ENDERECO_ENTREGA FROM PEDIDOS ORDER BY ID DESC LIMIT 1;';
 
@@ -80,33 +124,22 @@ begin
       Open;
       PedidoJSON := FQuery.ToJSONObject();
 
-      FSQL := 'SELECT ID, "DATA" AS DATA_ABERTURA, ABERTO, TOTAL FROM CAIXAS WHERE ID = :ID;';
+      ClienteJSON := lController.CLIENTE.GetByID(PedidoJSON.GetValue<integer>('cliente'));
 
-      Close;
-      SQL.Text := FSQL;
-      ParamByName('ID').Value := PedidoJSON.GetValue<integer>('caixa');
-      Open;
-      CaixaJSON := FQuery.ToJSONObject();
+      EnderecoJSON := lController.ENDERECO.GetByID(PedidoJSON.GetValue<integer>('enderecoEntrega'));
 
-      FSQL := 'SELECT id AS ID, nome AS NOME, contato AS CONTATO FROM CLIENTES WHERE ID = :ID;';
+      CaixaJSON := lController.CAIXA.GetOpen;
 
-      Close;
-      SQL.Text := FSQL;
-      ParamByName('ID').Value := PedidoJSON.GetValue<integer>('cliente');
-      Open;
-      ClienteJSON := FQuery.ToJSONObject();
-
-      FSQL := 'SELECT ID, RUA, NUMERO, BAIRRO, COMPLEMENTO, CIDADE, ESTADO FROM ENDERECOS WHERE ID = :ID;';
-
-      Close;
-      SQL.Text := FSQL;
-      ParamByName('ID').Value := PedidoJSON.GetValue<integer>('enderecoEntrega');
-      Open;
-      EnderecoJSON := FQuery.ToJSONObject();
-
-      PedidoResultJSON.AddPair('id', PedidoJSON.GetValue<integer>('id')).AddPair('dataPedido', FormatDateTime('dd-mm-yy hh:mm:ss', PedidoJSON.GetValue<TDateTime>('dataPedido'))).AddPair('total', PedidoJSON.GetValue<Double>('total')).AddPair('cancelado', PedidoJSON.GetValue<Boolean>('cancelado')).AddPair('aberto', PedidoJSON.GetValue<Boolean>('aberto')).AddPair('obs', PedidoJSON.GetValue<string>('obs')).AddPair('cliente', ClienteJSON).AddPair('enderecoEntrega', EnderecoJSON).AddPair('caixa', CaixaJSON);
-
-      Connection.Commit;
+      PedidoResultJSON
+            .AddPair('id', PedidoJSON.GetValue<integer>('id'))
+            .AddPair('dataPedido', FormatDateTime('dd-mm-yy hh:mm:ss', PedidoJSON.GetValue<TDateTime>('dataPedido')))
+            .AddPair('items', lItemsJSONResult)
+            .AddPair('total', PedidoJSON.GetValue<Double>('total'))
+            .AddPair('cancelado', PedidoJSON.GetValue<Boolean>('cancelado'))
+            .AddPair('aberto', PedidoJSON.GetValue<Boolean>('aberto'))
+            .AddPair('obs', PedidoJSON.GetValue<string>('obs'))
+            .AddPair('cliente', ClienteJSON).AddPair('enderecoEntrega', EnderecoJSON)
+            .AddPair('caixa', CaixaJSON);
     end;
     Result := PedidoResultJSON;
   except

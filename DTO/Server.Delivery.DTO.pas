@@ -123,7 +123,7 @@ type
 
   TCARDAPIO = class
   private
-    FPRECO: Double;
+    FPRECO: Currency;
     FDESCRICAO: string;
     FID: Integer;
     FPRODUTO: TObjectList<TPRODUTO>;
@@ -135,7 +135,7 @@ type
   public
     property ID: Integer read FID write SetID;
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
-    property PRECO: Double read FPRECO;
+    property PRECO: Currency read FPRECO;
     property PRODUTO: TObjectList<TPRODUTO> read FPRODUTO write SetPRODUTO;
     property TIPO_CARDAPIO: TTIPO_CARDAPIO read FTIPO_CARDAPIO write SetTIPO_CARDAPIO;
   end;
@@ -180,7 +180,7 @@ type
   private
     FITEM_CARDAPIO: TCARDAPIO;
     FPEDIDO: TPEDIDO;
-    FTOTAL: Double;
+    FTOTAL: Currency;
     FID: Integer;
     FQUANTIDADE: Integer;
     procedure SetID(const Value: Integer);
@@ -192,12 +192,12 @@ type
     property PEDIDO: TPEDIDO read FPEDIDO write SetPEDIDO;
     property ITEM_CARDAPIO: TCARDAPIO read FITEM_CARDAPIO write SetITEM_CARDAPIO;
     property QUANTIDADE: Integer read FQUANTIDADE write SetQUANTIDADE;
-    property TOTAL: Double read FTOTAL;
+    property TOTAL: Currency read FTOTAL;
   end;
 
   TCAIXA = class
   private
-    FTOTAL: Double;
+    FTOTAL: Currency;
     FABERTO: Boolean;
     FDATA: TDate;
     FID: Integer;
@@ -209,7 +209,7 @@ type
     property ID: Integer read FID write SetID;
     property DATA_ABERTURA: TDate read FDATA;
     property ABERTO: Boolean read FABERTO write SetABERTO;
-    property TOTAL: Double read FTOTAL;
+    property TOTAL: Currency read FTOTAL;
     property PEDIDOS: TObjectList<TPEDIDO> read FPEDIDOS write SetPEDIDOS;
   end;
 
@@ -417,7 +417,7 @@ end;
 procedure TITEM_PEDIDO.SetITEM_CARDAPIO(const Value: TCARDAPIO);
 begin
   FITEM_CARDAPIO := Value;
-  FTOTAL := FITEM_CARDAPIO.PRECO * FQUANTIDADE;
+  FTOTAL := FloatToCurr(FITEM_CARDAPIO.PRECO * FQUANTIDADE);
 end;
 
 procedure TITEM_PEDIDO.SetPEDIDO(const Value: TPEDIDO);
@@ -428,7 +428,7 @@ end;
 procedure TITEM_PEDIDO.SetQUANTIDADE(const Value: Integer);
 begin
   FQUANTIDADE := Value;
-  FTOTAL := FITEM_CARDAPIO.PRECO * FQUANTIDADE;
+  FTOTAL :=  FloatToCurr(FITEM_CARDAPIO.PRECO * FQUANTIDADE);
 end;
 
 { TTIPOPGTO }

@@ -68,7 +68,6 @@ var
   lCliente: TCLIENTE;
   lEndereco: TENDERECO;
   lTPPagamento: TObjectList<TTIPOPGTO>;
-  lCaixa: TCAIXA;
   lCardapio: TCARDAPIO;
   lItems: TObjectList<TITEM_PEDIDO>;
   lItem: TITEM_PEDIDO;
@@ -94,9 +93,6 @@ begin
   lEndereco.COMPLEMENTO := lEnderecoJSON.GetValue<string>('estado');
   lEndereco.CLIENTE := lCliente;
 
-  lCaixaJSON := lBody.GetValue<TJSONObject>('caixa');
-  lCaixa := TJSON.JsonToObject<TCAIXA>(lCaixaJSON);
-
   lTPPagamentoJsonArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
   lTPPagamento := TObjectList<TTIPOPGTO>.Create;
   for I := 0 to Pred(lTPPagamentoJsonArray.Count) do
@@ -110,7 +106,6 @@ begin
   lPedido.CLIENTE := lCliente;
   lPedido.ENDERECO_ENTREGA := lEndereco;
   lPedido.TIPO_PAGAMENTO := lTPPagamento;
-  lPedido.CAIXA := lCaixa;
 
   lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
   lItems := TObjectList<TITEM_PEDIDO>.Create;

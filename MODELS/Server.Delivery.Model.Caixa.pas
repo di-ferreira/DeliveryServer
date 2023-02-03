@@ -22,7 +22,6 @@ type
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
     FSQL: string;
-    function GetByTipo(aID_TIPO: Integer): TJSONArray;
   public
     constructor Create;
     destructor Destroy; override;
@@ -44,7 +43,7 @@ implementation
 
 function TModelServerDeliveryCaixa.CloseCaixa(aID: Integer): TJSONObject;
 begin
-  FSQL := 'UPDATE CAIXAS SET ABERTO=false WHERE ID=:ID;';
+  FSQL := 'UPDATE CAIXAS SET ABERTO=false, TOTAL=(SELECT SUM(TOTAL) FROM PEDIDOS WHERE CAIXA =:ID) WHERE ID=:ID;';
   try
     with FQuery do
     begin
@@ -135,40 +134,67 @@ end;
 
 function TModelServerDeliveryCaixa.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ID = :ID';
-  with FQuery do
-  begin
-    Close;
-    SQL.Text := FSQL;
-    ParamByName('ID').Value := aID;
-    Open;
-  end;
-  Result := FQuery.ToJSONObject();
-end;
+  FSQL := 'UPDATE CAIXAS SET TOTAL=(SELECT SUM(TOTAL) FROM PEDIDOS WHERE CAIXA =:ID) WHERE ID=:ID;';
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
 
-function TModelServerDeliveryCaixa.GetByTipo(aID_TIPO: Integer): TJSONArray;
-begin
-  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIO C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE T.ID = :ID';
-  with FQuery do
-  begin
-    Close;
-    SQL.Text := FSQL;
-    ParamByName('ID').Value := aID_TIPO;
-    Open;
+      ParamByName('ID').Value := aID;
+      ExecSQL;
+
+      Connection.Commit;
+
+      FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ID = :ID;';
+
+      Close;
+      SQL.Text := FSQL;
+      ParamByName('ID').Value := aID;
+      Open;
+    end;
+    Result := FQuery.ToJSONObject();
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
   end;
-  Result := FQuery.ToJSONArray();
 end;
 
 function TModelServerDeliveryCaixa.GetOpen: TJSONObject;
 begin
-  FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ABERTO = 1;';
-  with FQuery do
-  begin
-    Close;
-    SQL.Text := FSQL;
-    Open;
+  FSQL := 'UPDATE CAIXAS SET TOTAL=(SELECT SUM(TOTAL) FROM PEDIDOS WHERE CAIXA =(SELECT ID FROM CAIXAS WHERE ABERTO = 1)) WHERE ABERTO = 1;';
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+      ExecSQL;
+
+
+      FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ABERTO = 1;';
+
+      Close;
+      SQL.Text := FSQL;
+      Open;
+      Connection.Commit;
+    end;
+    Result := FQuery.ToJSONObject();
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
   end;
-  Result := FQuery.ToJSONObject();
 end;
 
 class function TModelServerDeliveryCaixa.New: iModelServerDeliveryCaixa<TCAIXA>;
