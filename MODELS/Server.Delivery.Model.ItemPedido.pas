@@ -29,9 +29,9 @@ type
     function Save(aValue: TITEM_PEDIDO): TJSONObject;
     function GetAll: TJSONArray;
     function GetByID(aID: Integer): TJSONObject;
+    function GetByPedido(aIDPedido: Integer): TJSONArray;
     function Update(aValue: TITEM_PEDIDO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
-    function GetByPedido(aIDPedido: Integer): TJSONArray;
   end;
 
 implementation
@@ -108,8 +108,14 @@ var
   lItem: TJSONObject;
   lController: iControllerServerDelivery;
   I: Integer;
+  s, sID: string;
 begin
-  FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO WHERE PEDIDO = :PEDIDO ;';
+  FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO WHERE PEDIDO = :PEDIDO;';
+
+  lItems := TJSONArray.Create;
+  lItemsResult := TJSONArray.Create;
+  lController := TControllerServerDelivery.New;
+
   with FQuery do
   begin
     Close;
@@ -118,33 +124,21 @@ begin
     Open;
   end;
 
-//  lItems :=   TJSONArray.Create;
-//  lItemsResult :=   TJSONArray.Create;
-//
-//  lItems := FQuery.ToJSONArray();
-//
-//  lController := TControllerServerDelivery.New;
-//
-//  lItemsResult := TJSONArray.Create;
-//
-//  for I := 0 to Pred(lItems.Count) do
-//  begin
-//    lItem := TJSONObject.Create;
-//    lItem.AddPair('id', lItems.Items[I].GetValue<integer>('id'));
-//    lItem.AddPair('total', lItems.Items[I].GetValue<Double>('total'));
-//    lItem.AddPair('quantidade', lItems.Items[I].GetValue<integer>('quantidade'));
-//    lItem.AddPair('itemCardapio', lController.CARDAPIO.GetByTipo(lItems.Items[I].GetValue<integer>('itemCardapio')));
-//
-//    lItemsResult.Add(lItem);
-//  end;
+  lItems := FQuery.ToJSONArray();
 
-//      SQL.Clear;
-//      FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO WHERE  PEDIDO = :PEDIDO;';
-//      SQL.Text := FSQL;
-//      ParamByName('PEDIDO').Value := PedidoJSONSearch.Items[I].GetValue<integer>('id');
-//      Open;
-//      lItemsJSONSearch := FQuery.ToJSONArray();
-  Result := FQuery.ToJSONArray();
+
+  for I := 0 to Pred(lItems.Count) do
+  begin
+    lItem := TJSONObject.Create;
+    lItem.AddPair('id', lItems.Items[I].GetValue<integer>('id'));
+    lItem.AddPair('total', lItems.Items[I].GetValue<Double>('total'));
+    lItem.AddPair('quantidade', lItems.Items[I].GetValue<integer>('quantidade'));
+    lItem.AddPair('itemCardapio', lController.CARDAPIO.GetByID(lItems.Items[I].GetValue<integer>('itemCardapio')));
+
+    lItemsResult.Add(lItem);
+  end;
+
+  Result := lItemsResult;
 end;
 
 class function TModelServerDeliveryItemPedido.New: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;

@@ -190,7 +190,6 @@ begin
     SQL.Text := FSQL;
     Open;
     PedidoJSONSearch := FQuery.ToJSONArray();
-
     PedidoJSONResult := TJSONArray.Create;
     lItemsJSONResult := TJSONArray.Create;
 
@@ -225,16 +224,49 @@ begin
 end;
 
 function TModelServerDeliveryPedido.GetByID(aID: Integer): TJSONObject;
+var
+  CaixaJSON,
+  ClienteJSON,
+  EnderecoJSON,
+  PedidoJSON,
+  lItemJSON,
+  PedidoJSONSearch: TJSONObject;
+  lItemsJSONResult: TJSONArray;
+  lController: iControllerServerDelivery;
+  I, J: Integer;
 begin
-  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID';
+  lController := TControllerServerDelivery.New;
+
+  CaixaJSON := TJSONObject.Create;
+  ClienteJSON := TJSONObject.Create;
+  EnderecoJSON := TJSONObject.Create;
+
+  FSQL := 'SELECT ID, "DATA" AS DATA_PEDIDO, TOTAL, CANCELADO, ABERTO, OBS, CAIXA, CLIENTE, ENDERECO_ENTREGA FROM PEDIDOS WHERE ID = :ID;';
+
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
     ParamByName('ID').Value := aID;
     Open;
+    PedidoJSONSearch := FQuery.ToJSONObject();
+
+    lItemsJSONResult := TJSONArray.Create;
+
+
+      lItemsJSONResult := lController.ITEM_PEDIDO.GetByPedido(PedidoJSONSearch.GetValue<integer>('id'));
+
+      ClienteJSON := lController.CLIENTE.GetByID(PedidoJSONSearch.GetValue<integer>('cliente'));
+
+      EnderecoJSON := lController.ENDERECO.GetByID(PedidoJSONSearch.GetValue<integer>('enderecoEntrega'));
+
+      CaixaJSON := lController.CAIXA.GetByID(PedidoJSONSearch.GetValue<integer>('caixa'));
+
+      PedidoJSON := TJSONObject.Create;
+      PedidoJSON.AddPair('id', PedidoJSONSearch.GetValue<integer>('id')).AddPair('dataPedido', FormatDateTime('dd-mm-yy hh:mm:ss', PedidoJSONSearch.GetValue<TDateTime>('dataPedido'))).AddPair('items', lItemsJSONResult).AddPair('total', PedidoJSONSearch.GetValue<Double>('total')).AddPair('cancelado', PedidoJSONSearch.GetValue<Boolean>('cancelado')).AddPair('aberto', PedidoJSONSearch.GetValue<Boolean>('aberto')).AddPair('obs', PedidoJSONSearch.GetValue<string>('obs')).AddPair('cliente', ClienteJSON).AddPair('enderecoEntrega', EnderecoJSON).AddPair('caixa', CaixaJSON);
   end;
-  Result := FQuery.ToJSONObject();
+
+  Result := PedidoJSON;
 end;
 
 class function TModelServerDeliveryPedido.New: iModelServerDeliveryPedido<TPEDIDO>;
@@ -318,40 +350,40 @@ begin
 end;
 
 function TModelServerDeliveryPedido.Update(aValue: TPEDIDO): TJSONObject;
+var
+aPedido:TJSONObject;
 begin
-//  FSQL := 'UPDATE PRODUTOS SET nome = :nome, ESTOQUE = :ESTOQUE, CUSTO = :CUSTO, PERCENTUAL_LUCRO = :PERCENTUAL_LUCRO WHERE id = :id';
-//  try
-//    with FQuery do
-//    begin
-//      Connection.StartTransaction;
-//      SQL.Text := FSQL;
-//
-//      ParamByName('id').Value := aValue.ID;
-//      ParamByName('nome').Value := aValue.NOME;
-//      ParamByName('ESTOQUE').Value := aValue.ESTOQUE;
-//      ParamByName('CUSTO').Value := aValue.CUSTO;
-//      ParamByName('PERCENTUAL_LUCRO').Value := aValue.LUCRO;
-//      ExecSQL;
-//      Connection.Commit;
-//
-//      FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID;';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      ParamByName('ID').Value := aValue.ID;
-//      Open;
-//    end;
-//    Result := FQuery.ToJSONObject();
-//  except
-//    on E: Exception do
-//    begin
-//      with FQuery do
-//      begin
-//        Connection.Rollback;
-//        Result := TJSONObject.Create;
-//      end;
-//    end;
-//  end;
+  FSQL := 'UPDATE PEDIDOS SET TOTAL=:TOTAL, CANCELADO=:CANCELADO, ABERTO=:ABERTO, OBS=:OBS, ENDERECO_ENTREGA=:ENDERECO_ENTREGA WHERE ID=:ID;';
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+
+      ParamByName('ID').Value := aValue.ID;
+      ParamByName('TOTAL').Value := aValue.TOTAL;
+      ParamByName('CANCELADO').Value := aValue.CANCELADO;
+      ParamByName('ABERTO').Value := aValue.ABERTO;
+      ParamByName('OBS').Value := aValue.OBS;
+      ParamByName('ENDERECO_ENTREGA').Value := aValue.ENDERECO_ENTREGA.ID;
+      ExecSQL;
+      Connection.Commit;
+
+      aPedido := TJSONObject.Create;
+
+      aPedido := Self.GetByID(aValue.ID);
+    end;
+    Result := aPedido;
+  except
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
 end;
 
 end.
