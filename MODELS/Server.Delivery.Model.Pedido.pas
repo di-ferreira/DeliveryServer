@@ -351,7 +351,8 @@ end;
 
 function TModelServerDeliveryPedido.Update(aValue: TPEDIDO): TJSONObject;
 var
-aPedido:TJSONObject;
+  aPedido:TJSONObject;
+  aTipoPgto:TTIPOPGTO;
 begin
   FSQL := 'UPDATE PEDIDOS SET TOTAL=:TOTAL, CANCELADO=:CANCELADO, ABERTO=:ABERTO, OBS=:OBS, ENDERECO_ENTREGA=:ENDERECO_ENTREGA WHERE ID=:ID;';
   try
@@ -367,6 +368,20 @@ begin
       ParamByName('OBS').Value := aValue.OBS;
       ParamByName('ENDERECO_ENTREGA').Value := aValue.ENDERECO_ENTREGA.ID;
       ExecSQL;
+
+      if aValue.TIPO_PAGAMENTO.Count > 0 then
+      begin
+      for aTipoPgto in aValue.TIPO_PAGAMENTO do
+        begin
+          FSQL := 'INSERT INTO PEDIDOS_TIPOS_PAGAMENTOS (ID_PEDIDO, ID_TIPO_PAGAMENTO) VALUES(:ID_PEDIDO, :ID_TIPO_PAGAMENTO);';
+          SQL.Text := FSQL;
+
+          ParamByName('ID_PEDIDO').Value := aValue.ID;
+          ParamByName('ID_TIPO_PAGAMENTO').Value := aTipoPgto.ID;
+          ExecSQL;
+        end;
+      end;
+
       Connection.Commit;
 
       aPedido := TJSONObject.Create;

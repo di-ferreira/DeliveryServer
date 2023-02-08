@@ -35,6 +35,8 @@ type
   end;
 
 implementation
+uses
+  Server.Delivery.Controller.Interfaces, Server.Delivery.Controller;
 { TModelServerDeliveryCardapio }
 
 constructor TModelServerDeliveryCardapio.Create;
@@ -105,16 +107,48 @@ begin
 end;
 
 function TModelServerDeliveryCardapio.GetByID(aID: Integer): TJSONObject;
+var
+  lCardapioJSON, lProdutoJSON:TJSONObject;
+  lProdutos:TJSONArray;
+  lController: iControllerServerDelivery;
+  I:integer;
 begin
-  FSQL := 'SELECT C.ID, C.DESCRICAO, C.PRECO, T.DESCRICAO AS TIPO FROM CARDAPIOS C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE C.ID = :ID';
+  lController := TControllerServerDelivery.New;
+
+  FSQL := 'SELECT ID, DESCRICAO, PRECO, TIPO FROM CARDAPIOS WHERE ID = :ID';
+
+  lCardapioJSON := TJSONObject.Create;
+  lProdutoJSON := TJSONObject.Create;
+  lProdutos := TJSONArray.Create;
+
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
     ParamByName('ID').Value := aID;
     Open;
+
+    lCardapioJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
+    lCardapioJSON.AddPair('descricao', FQuery.FieldByName('DESCRICAO').AsString);
+    lCardapioJSON.AddPair('preco', FQuery.FieldByName('PRECO').AsFloat);
+    lCardapioJSON.AddPair('tipo', lController.TIPO_CARDAPIO.GetByID(FQuery.FieldByName('TIPO').AsInteger));
+
+    FSQL := 'SELECT ID, ID_CARDAPIO, ID_PRODUTO FROM CARDAPIO_PRODUTO WHERE ID = :ID_CARDAPIO;';
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('ID_CARDAPIO').Value := aID;
+    Open;
+
+    for I := 0 to Pred(FQuery.RecordCount) do
+    begin
+      lProdutos.Add(lController.PRODUTO.GetByID(FieldByName('ID_PRODUTO').AsInteger));
+      FQuery.Next;
+    end;
+
+    lCardapioJSON.AddPair('produtos',lProdutos);
   end;
-  Result := FQuery.ToJSONObject();
+
+  Result := lCardapioJSON;
 end;
 
 function TModelServerDeliveryCardapio.GetByTipo(aID_TIPO: Integer): TJSONArray;

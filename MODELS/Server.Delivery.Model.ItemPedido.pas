@@ -147,39 +147,47 @@ begin
 end;
 
 function TModelServerDeliveryItemPedido.Save(aValue: TITEM_PEDIDO): TJSONObject;
+var
+  lItemJSON: TJSONObject;
+  lController: iControllerServerDelivery;
 begin
-//  FSQL := 'INSERT INTO PRODUTOS (ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO) VALUES (Null, :NOME, :ESTOQUE, :CUSTO, :PERCENTUAL_LUCRO);';
-//
-//  try
-//    with FQuery do
-//    begin
-//      Connection.StartTransaction;
-//      SQL.Text := FSQL;
-//      ParamByName('NOME').Value := aValue.NOME;
-//      ParamByName('ESTOQUE').Value := aValue.ESTOQUE;
-//      ParamByName('CUSTO').Value := aValue.CUSTO;
-//      ParamByName('PERCENTUAL_LUCRO').Value := aValue.LUCRO;
-//      ExecSQL;
-//      Connection.Commit;
-//
-//      FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=last_insert_rowid();';
-//
-//      Close;
-//      SQL.Text := FSQL;
-//      Open;
-//    end;
-//    Result := FQuery.ToJSONObject();
-//  except
-//
-//    on E: Exception do
-//    begin
-//      with FQuery do
-//      begin
-//        Connection.Rollback;
-//        Result := TJSONObject.Create;
-//      end;
-//    end;
-//  end;
+  lController := TControllerServerDelivery.New;
+  FSQL := 'INSERT INTO ITEMS_PEDIDO (TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO) VALUES(:TOTAL, :QUANTIDADE, :ITEM_CARDAPIO, :PEDIDO);';
+
+  try
+    with FQuery do
+    begin
+      Connection.StartTransaction;
+      SQL.Text := FSQL;
+      ParamByName('TOTAL').Value := aValue.TOTAL;
+      ParamByName('QUANTIDADE').Value := aValue.QUANTIDADE;
+      ParamByName('ITEM_CARDAPIO').Value := aValue.ITEM_CARDAPIO.ID;
+      ParamByName('PEDIDO').Value := aValue.PEDIDO.ID;
+      ExecSQL;
+      Connection.Commit;
+
+      FSQL := 'SELECT ID, TOTAL, QUANTIDADE, ITEM_CARDAPIO, PEDIDO FROM ITEMS_PEDIDO ORDER BY ID DESC LIMIT 1;';
+      SQL.Text := FSQL;
+      Open;
+
+      lItemJSON := TJSONObject.Create;
+      lItemJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
+      lItemJSON.AddPair('total', FQuery.FieldByName('TOTAL').AsFloat);
+      lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE').AsInteger);
+      lItemJSON.AddPair('itemCardapio', lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO').AsInteger));
+    end;
+    Result := lItemJSON;
+  except
+
+    on E: Exception do
+    begin
+      with FQuery do
+      begin
+        Connection.Rollback;
+        Result := TJSONObject.Create;
+      end;
+    end;
+  end;
 end;
 
 function TModelServerDeliveryItemPedido.Update(aValue: TITEM_PEDIDO): TJSONObject;

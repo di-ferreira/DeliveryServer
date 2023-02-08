@@ -209,8 +209,10 @@ var
   lResult, lCardapioJSON, lPedidoJSON: TJSONObject;
   lController: iControllerServerDelivery;
   lPedidoFound: TPEDIDO;
-  lItemsJsonArray:TJSONArray;
+  lItemsJsonArray, lTiposPagamentoArray:TJSONArray;
   lCardapio:TCARDAPIO;
+  lTipoPagamento:TTIPOPGTO;
+  lTiposPagamento:TObjectList<TTIPOPGTO>;
   lItem:TITEM_PEDIDO;
   lItems:TObjectList<TITEM_PEDIDO>;
   I:Integer;
@@ -235,12 +237,13 @@ begin
   lPedidoFound :=  TPEDIDO.Create;
 
   lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
+  lTiposPagamentoArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
   lItems := TObjectList<TITEM_PEDIDO>.Create;
 
   lPedidoFound.ID := lPedidoJSON.GetValue<integer>('id');
   lPedidoFound.OBS := lPedidoJSON.GetValue<string>('obs');
-  lPedidoFound.ABERTO := lPedidoJSON.GetValue<Boolean>('aberto');
-  lPedidoFound.ENDERECO_ENTREGA := TJSON.JsonToObject<TENDERECO>(lPedidoJSON.GetValue<TJSONObject>);
+  lPedidoFound.CANCELADO := lPedidoJSON.GetValue<Boolean>('cancelado');
+  lPedidoFound.ENDERECO_ENTREGA := TJSON.JsonToObject<TENDERECO>(lPedidoJSON.GetValue<TJSONObject>('enderecoEntrega'));
 
   for I := 0 to Pred(lItemsJsonArray.Count) do
   begin
@@ -255,15 +258,28 @@ begin
     lItems.Add(lItem);
   end;
 
+  lTiposPagamento := TObjectList<TTIPOPGTO>.Create;
+
+  for I := 0 to Pred(lTiposPagamentoArray.Count) do
+  begin
+    lTipoPagamento := TTIPOPGTO.Create;
+    lTipoPagamento.ID := lTiposPagamentoArray.Items[I].GetValue<integer>('id');
+    lTipoPagamento.DESCRICAO := lTiposPagamentoArray.Items[I].GetValue<string>('descricao');
+
+    lTiposPagamento.Add(lTipoPagamento);
+  end;
+
+
   lPedidoFound.ITEMS := lItems;
-  lPedidoFound.CANCELADO := true;
+  lPedidoFound.TIPO_PAGAMENTO :=  lTiposPagamento;
+  lPedidoFound.ABERTO := False;
 
   lResult := lController.PEDIDO.Update(lPedidoFound);
 
   if lResult.Count > 0 then
-    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Pedido cancelado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Pedido fechado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao cancelar pedido!').ToJSON).Status(THTTPStatus.InternalServerError);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao fechar pedido!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
 procedure DeletePedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -294,6 +310,56 @@ begin
     Res.Send(TJSONObject.Create.AddPair('message', 'Produto não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
+procedure AddItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+var
+  lBody: TJSONValue;
+  lResult,
+  lCardapioJSON, lPedidoJSON: TJSONObject;
+  lController: iControllerServerDelivery;
+  lPedido: TPEDIDO;
+  lCardapio: TCARDAPIO;
+  lItem: TITEM_PEDIDO;
+  I, lPedidoID: Integer;
+  lPedidoIDParam:String;
+begin
+  Res.ContentType('application/json;charset=UTF-8');
+
+  lController := TControllerServerDelivery.New;
+  lBody := TJSONObject.ParseJSONValue(Req.Body);
+  lPedidoIDParam := Req.Params['id_pedido'];
+
+   if TryStrToInt(lPedidoIDParam, lPedidoID) then
+   begin
+    lPedido := TPEDIDO.Create;
+    lPedidoJSON := lController.PEDIDO.GetByID(lPedidoID);
+    lPedido.ID :=  lPedidoJSON.GetValue<integer>('id');
+    lPedido.OBS := lPedidoJSON.GetValue<string>('obs');
+    lPedido.CANCELADO := lPedidoJSON.GetValue<Boolean>('cancelado');
+    lPedido.ABERTO  := lPedidoJSON.GetValue<Boolean>('aberto');
+   end
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+
+    lCardapioJSON := lBody.GetValue<TJSONObject>('item_cardapio');
+    lCardapio := TJSON.JsonToObject<TCARDAPIO>(lController.CARDAPIO.GetByID(lCardapioJSON.GetValue<integer>('id')));
+    lItem := TITEM_PEDIDO.Create;
+    lItem.ID := 0;
+    lItem.PEDIDO := lPedido;
+    lItem.ITEM_CARDAPIO := lCardapio;
+    lItem.QUANTIDADE := lBody.GetValue<integer>('quantidade');
+
+  lResult := lController.ITEM_PEDIDO.Save(lItem);
+
+  if lResult.Count > 0 then
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Item adicionado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.Created)
+  else
+    Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao adicionar Item').ToJSON).Status(THTTPStatus.BadRequest);
+end;
+
+
 procedure Registry;
 begin
 {(*}
@@ -304,12 +370,8 @@ begin
     .Get('', GetPedidos)
     .Get(':id', GetPedidoByID)
     .Put(':id/cancelar', CancelarPedido)
-    .Put(':id/fechar', FecharPedido);
-//
-//  THorse
-//    .Group
-//      .Prefix('pedidos/:id_pedido/item')
-//    .Post('', AddItem)
+    .Put(':id/fechar', FecharPedido)
+    .Post(':id_pedido/item', AddItem);
 //    .Get(':id', GetItemByID)
 //    .Get(':id', GetItem)
 //    .Put(':id', UpdateItem)

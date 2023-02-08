@@ -87,6 +87,7 @@ end;
 function TModelServerDeliveryProduto.GetByID(aID: Integer): TJSONObject;
 begin
   FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID';
+
   with FQuery do
   begin
     Close;

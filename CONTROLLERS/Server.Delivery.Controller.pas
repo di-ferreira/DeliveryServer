@@ -94,7 +94,7 @@ end;
 
 function TControllerServerDelivery.ITEM_PEDIDO: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
 begin
-  if not Assigned(FPEDIDO) then
+  if not Assigned(FITEM_PEDIDO) then
     FITEM_PEDIDO := TModelServerDeliveryItemPedido.New;
 
   Result := FITEM_PEDIDO;
