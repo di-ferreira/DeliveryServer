@@ -51,7 +51,7 @@ end;
 
 function TModelServerDeliveryItemPedido.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'DELETE FROM PRODUTOS WHERE id = :id';
+  FSQL := 'DELETE FROM ITEMS_PEDIDO WHERE id = :id';
   with FQuery do
   begin
     SQL.Text := FSQL;

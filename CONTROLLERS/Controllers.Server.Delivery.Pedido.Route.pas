@@ -282,32 +282,37 @@ begin
     Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao fechar pedido!').ToJSON).Status(THTTPStatus.InternalServerError);
 end;
 
-procedure DeletePedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure DeleteItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
   lBody, lResult: TJSONObject;
   lController: iControllerServerDelivery;
-  lProduto: TPRODUTO;
+  lItemPedido: TITEM_PEDIDO;
 begin
   Res.ContentType('application/json;charset=UTF-8');
   lController := TControllerServerDelivery.New;
   lValue := Req.Params['id'];
 
   if TryStrToInt(lValue, lID) then
-    lBody := lController.PRODUTO.GetByID(lID);
+    lBody := lController.ITEM_PEDIDO.GetByID(lID)
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
 
   if lBody.Count > 0 then
   begin
-    lProduto := TJSON.JsonToObject<TPRODUTO>(lBody);
-    lResult := lController.PRODUTO.Delete(lProduto.ID);
+    lItemPedido := TJSON.JsonToObject<TITEM_PEDIDO>(lBody);
+    lResult := lController.ITEM_PEDIDO.Delete(lItemPedido.ID);
     if lResult.Count > 0 then
       Res.Send(lResult.ToJSON).Status(THTTPStatus.InternalServerError)
     else
-      Res.Send(TJSONObject.Create.AddPair('message', 'Produto excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
+      Res.Send(TJSONObject.Create.AddPair('message', 'Item excluído com sucesso!').ToJSON).Status(THTTPStatus.OK)
   end
   else
-    Res.Send(TJSONObject.Create.AddPair('message', 'Produto não encontrado').ToJSON).Status(THTTPStatus.NotFound);
+    Res.Send(TJSONObject.Create.AddPair('message', 'Item não encontrado').ToJSON).Status(THTTPStatus.NotFound);
 end;
 
 procedure AddItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -424,6 +429,32 @@ begin
     Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
 end;
 
+procedure GetItems(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+var
+  lID: Integer;
+  lValue: string;
+  lBody: TJSONArray;
+  lController: iControllerServerDelivery;
+begin
+  Res.ContentType('application/json;charset=UTF-8');
+
+  lController := TControllerServerDelivery.New;
+  lValue := Req.Params['id_pedido'];
+
+  if TryStrToInt(lValue, lID) then
+    lBody := lController.ITEM_PEDIDO.GetByPedido(lID)
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+
+  if lBody.Count > 0 then
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
+  else
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
+end;
+
 procedure Registry;
 begin
 {(*}
@@ -436,9 +467,10 @@ begin
     .Put(':id/cancelar', CancelarPedido)
     .Put(':id/fechar', FecharPedido)
     .Post(':id_pedido/items', AddItem)
+    .Get(':id_pedido/items', GetItems)
     .Get(':id_pedido/items/:id', GetItemByID)
-    .Put(':id_pedido/items/:id', EditItem);
-//    .Delete(':id', DeleteItem);
+    .Put(':id_pedido/items/:id', EditItem)
+    .Delete(':id_pedido/items/:id', DeleteItem);
 
 {*)}
 end;
