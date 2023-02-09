@@ -359,6 +359,70 @@ begin
     Res.Send(TJSONObject.Create.AddPair('error', 'Erro ao adicionar Item').ToJSON).Status(THTTPStatus.BadRequest);
 end;
 
+procedure EditItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+var
+  lID: Integer;
+  lValue,s: string;
+  lResult, lBody: TJSONObject;
+  lController: iControllerServerDelivery;
+  lItemPedido, lItemPedidoFound: TITEM_PEDIDO;
+begin
+  Res.ContentType('application/json;charset=UTF-8');
+
+  lController := TControllerServerDelivery.New;
+  lValue := Req.Params['id'];
+
+  if TryStrToInt(lValue, lID) then
+  begin
+    lBody := lController.ITEM_PEDIDO.GetByID(lID);
+  end
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+   s := lBody.ToJSON;
+  lItemPedidoFound := TJSON.JsonToObject<TITEM_PEDIDO>(lBody);
+
+  lItemPedido := TJSON.JsonToObject<TITEM_PEDIDO>(Req.Body);
+
+  lItemPedido.ITEM_CARDAPIO :=  TJSON.JsonToObject<TCARDAPIO>(lBody.GetValue<TJSONObject>('itemCardapio'));
+
+  lItemPedido.ID := lItemPedidoFound.ID;
+
+  lResult := lController.ITEM_PEDIDO.Update(lItemPedido);
+
+  if lResult.Count > 0 then
+    Res.Send(TJSONArray.Create().Add(TJSONObject.Create.AddPair('message', 'Item atualizado com sucesso!')).Add(lResult).ToJSON).Status(THTTPStatus.OK)
+  else
+    Res.Send(TJSONObject.Create.AddPair('message', 'Erro ao atualizar item!').ToJSON).Status(THTTPStatus.InternalServerError);
+end;
+
+procedure GetItemByID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+var
+  lID: Integer;
+  lValue: string;
+  lBody: TJSONObject;
+  lController: iControllerServerDelivery;
+begin
+  Res.ContentType('application/json;charset=UTF-8');
+
+  lController := TControllerServerDelivery.New;
+  lValue := Req.Params['id'];
+
+  if TryStrToInt(lValue, lID) then
+    lBody := lController.ITEM_PEDIDO.GetByID(lID)
+  else
+  begin
+    Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
+    exit;
+  end;
+
+  if lBody.Count > 0 then
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.OK)
+  else
+    Res.Send(lBody.ToJSON).Status(THTTPStatus.NotFound);
+end;
 
 procedure Registry;
 begin
@@ -371,10 +435,9 @@ begin
     .Get(':id', GetPedidoByID)
     .Put(':id/cancelar', CancelarPedido)
     .Put(':id/fechar', FecharPedido)
-    .Post(':id_pedido/item', AddItem);
-//    .Get(':id', GetItemByID)
-//    .Get(':id', GetItem)
-//    .Put(':id', UpdateItem)
+    .Post(':id_pedido/items', AddItem)
+    .Get(':id_pedido/items/:id', GetItemByID)
+    .Put(':id_pedido/items/:id', EditItem);
 //    .Delete(':id', DeleteItem);
 
 {*)}
