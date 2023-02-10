@@ -72,18 +72,19 @@ var
   lItems: TObjectList<TITEM_PEDIDO>;
   lItem: TITEM_PEDIDO;
   I: Integer;
-  S: string;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
   lController := TControllerServerDelivery.New;
+  lPedido := TPEDIDO.Create;
+  lEndereco := TENDERECO.Create;
   lBody := TJSONObject.ParseJSONValue(Req.Body);
 
   lClienteJSON := lBody.GetValue<TJSONObject>('cliente');
   lCliente := TJSON.JsonToObject<TCLIENTE>(lClienteJSON);
 
   lEnderecoJSON := lBody.GetValue<TJSONObject>('endereco_entrega');
-  lEndereco := TENDERECO.Create;
+
   lEndereco.ID := lEnderecoJSON.GetValue<integer>('id');
   lEndereco.RUA := lEnderecoJSON.GetValue<string>('rua');
   lEndereco.NUMERO := lEnderecoJSON.GetValue<string>('numero');
@@ -93,19 +94,23 @@ begin
   lEndereco.COMPLEMENTO := lEnderecoJSON.GetValue<string>('estado');
   lEndereco.CLIENTE := lCliente;
 
-  lTPPagamentoJsonArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
-  lTPPagamento := TObjectList<TTIPOPGTO>.Create;
-  for I := 0 to Pred(lTPPagamentoJsonArray.Count) do
-    lTPPagamento.Add(TJSON.JsonToObject<TTIPOPGTO>(lController.TIPO_PGTO.GetByID(lTPPagamentoJsonArray.Items[I].GetValue<Integer>('id'))));
+  if lBody.TryGetValue('tipos_pagamento', lTPPagamentoJsonArray) then
+  begin
 
-  lPedido := TPEDIDO.Create;
+    lTPPagamentoJsonArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
+    lTPPagamento := TObjectList<TTIPOPGTO>.Create;
+    for I := 0 to Pred(lTPPagamentoJsonArray.Count) do
+      lTPPagamento.Add(TJSON.JsonToObject<TTIPOPGTO>(lController.TIPO_PGTO.GetByID(lTPPagamentoJsonArray.Items[I].GetValue<Integer>('id'))));
+
+    lPedido.TIPO_PAGAMENTO := lTPPagamento;
+  end;
+
   lPedido.ID := lBody.GetValue<integer>('id');
   lPedido.ABERTO := lBody.GetValue<Boolean>('aberto');
   lPedido.CANCELADO := lBody.GetValue<Boolean>('cancelado');
   lPedido.OBS := lBody.GetValue<string>('obs');
   lPedido.CLIENTE := lCliente;
   lPedido.ENDERECO_ENTREGA := lEndereco;
-  lPedido.TIPO_PAGAMENTO := lTPPagamento;
 
   lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
   lItems := TObjectList<TITEM_PEDIDO>.Create;
@@ -140,15 +145,15 @@ procedure CancelarPedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
   lValue: string;
-  lBody:TJSONValue;
+  lBody: TJSONValue;
   lResult, lCardapioJSON, lPedidoJSON: TJSONObject;
   lController: iControllerServerDelivery;
   lPedidoFound: TPEDIDO;
-  lItemsJsonArray:TJSONArray;
-  lCardapio:TCARDAPIO;
-  lItem:TITEM_PEDIDO;
-  lItems:TObjectList<TITEM_PEDIDO>;
-  I:Integer;
+  lItemsJsonArray: TJSONArray;
+  lCardapio: TCARDAPIO;
+  lItem: TITEM_PEDIDO;
+  lItems: TObjectList<TITEM_PEDIDO>;
+  I: Integer;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
@@ -166,7 +171,7 @@ begin
     exit;
   end;
 
-  lPedidoFound :=  TPEDIDO.Create;
+  lPedidoFound := TPEDIDO.Create;
 
   lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
   lItems := TObjectList<TITEM_PEDIDO>.Create;
@@ -175,7 +180,6 @@ begin
   lPedidoFound.OBS := lPedidoJSON.GetValue<string>('obs');
   lPedidoFound.ABERTO := lPedidoJSON.GetValue<Boolean>('aberto');
   lPedidoFound.ENDERECO_ENTREGA := TJSON.JsonToObject<TENDERECO>(lPedidoJSON.GetValue<TJSONObject>);
-
 
   for I := 0 to Pred(lItemsJsonArray.Count) do
   begin
@@ -203,20 +207,20 @@ end;
 
 procedure FecharPedido(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
-  lID: Integer;
+  lID, I: Integer;
   lValue: string;
-  lBody:TJSONValue;
+  lBody: TJSONValue;
   lResult, lCardapioJSON, lPedidoJSON: TJSONObject;
   lController: iControllerServerDelivery;
   lPedidoFound: TPEDIDO;
-  lItemsJsonArray, lTiposPagamentoArray:TJSONArray;
-  lCardapio:TCARDAPIO;
-  lTipoPagamento:TTIPOPGTO;
-  lTiposPagamento:TObjectList<TTIPOPGTO>;
-  lItem:TITEM_PEDIDO;
-  lItems:TObjectList<TITEM_PEDIDO>;
-  I:Integer;
-  s:string;
+  lItemsJsonArray, lTiposPagamentoArray: TJSONArray;
+  lCardapio: TCARDAPIO;
+  lTipoPagamento: TTIPOPGTO;
+  lTiposPagamento: TObjectList<TTIPOPGTO>;
+  lItem: TITEM_PEDIDO;
+  lItems: TObjectList<TITEM_PEDIDO>;
+  lTotalTipoPgto: Double;
+  lDiferencaPgto, lDif: Boolean;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
@@ -234,7 +238,7 @@ begin
     exit;
   end;
 
-  lPedidoFound :=  TPEDIDO.Create;
+  lPedidoFound := TPEDIDO.Create;
 
   lItemsJsonArray := lBody.GetValue<TJSONArray>('items');
   lTiposPagamentoArray := lBody.GetValue<TJSONArray>('tipos_pagamento');
@@ -265,14 +269,25 @@ begin
     lTipoPagamento := TTIPOPGTO.Create;
     lTipoPagamento.ID := lTiposPagamentoArray.Items[I].GetValue<integer>('id');
     lTipoPagamento.DESCRICAO := lTiposPagamentoArray.Items[I].GetValue<string>('descricao');
+    lTipoPagamento.VALOR_PAGO := lTotalTipoPgto + lTiposPagamentoArray.Items[I].GetValue<Double>('valor');
 
+    lTotalTipoPgto := lTotalTipoPgto + lTiposPagamentoArray.Items[I].GetValue<Double>('valor');
     lTiposPagamento.Add(lTipoPagamento);
   end;
 
-
   lPedidoFound.ITEMS := lItems;
-  lPedidoFound.TIPO_PAGAMENTO :=  lTiposPagamento;
+  lPedidoFound.TIPO_PAGAMENTO := lTiposPagamento;
   lPedidoFound.ABERTO := False;
+
+  lDiferencaPgto := lBody.GetValue<Boolean>('diferencaPagamento');
+
+  lDif :=  (lPedidoFound.TOTAL <> lTotalTipoPgto);
+
+  if (lDif AND not lDiferencaPgto) then
+  begin
+    Res.Send(TJSONObject.Create.AddPair('message', 'Pagamento diferente do total!').ToJSON).Status(THTTPStatus.BadRequest);
+    exit;
+  end;
 
   lResult := lController.PEDIDO.Update(lPedidoFound);
 
@@ -318,14 +333,13 @@ end;
 procedure AddItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lBody: TJSONValue;
-  lResult,
-  lCardapioJSON, lPedidoJSON: TJSONObject;
+  lResult, lCardapioJSON, lPedidoJSON: TJSONObject;
   lController: iControllerServerDelivery;
   lPedido: TPEDIDO;
   lCardapio: TCARDAPIO;
   lItem: TITEM_PEDIDO;
   I, lPedidoID: Integer;
-  lPedidoIDParam:String;
+  lPedidoIDParam: string;
 begin
   Res.ContentType('application/json;charset=UTF-8');
 
@@ -333,28 +347,28 @@ begin
   lBody := TJSONObject.ParseJSONValue(Req.Body);
   lPedidoIDParam := Req.Params['id_pedido'];
 
-   if TryStrToInt(lPedidoIDParam, lPedidoID) then
-   begin
+  if TryStrToInt(lPedidoIDParam, lPedidoID) then
+  begin
     lPedido := TPEDIDO.Create;
     lPedidoJSON := lController.PEDIDO.GetByID(lPedidoID);
-    lPedido.ID :=  lPedidoJSON.GetValue<integer>('id');
+    lPedido.ID := lPedidoJSON.GetValue<integer>('id');
     lPedido.OBS := lPedidoJSON.GetValue<string>('obs');
     lPedido.CANCELADO := lPedidoJSON.GetValue<Boolean>('cancelado');
-    lPedido.ABERTO  := lPedidoJSON.GetValue<Boolean>('aberto');
-   end
+    lPedido.ABERTO := lPedidoJSON.GetValue<Boolean>('aberto');
+  end
   else
   begin
     Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
     exit;
   end;
 
-    lCardapioJSON := lBody.GetValue<TJSONObject>('item_cardapio');
-    lCardapio := TJSON.JsonToObject<TCARDAPIO>(lController.CARDAPIO.GetByID(lCardapioJSON.GetValue<integer>('id')));
-    lItem := TITEM_PEDIDO.Create;
-    lItem.ID := 0;
-    lItem.PEDIDO := lPedido;
-    lItem.ITEM_CARDAPIO := lCardapio;
-    lItem.QUANTIDADE := lBody.GetValue<integer>('quantidade');
+  lCardapioJSON := lBody.GetValue<TJSONObject>('item_cardapio');
+  lCardapio := TJSON.JsonToObject<TCARDAPIO>(lController.CARDAPIO.GetByID(lCardapioJSON.GetValue<integer>('id')));
+  lItem := TITEM_PEDIDO.Create;
+  lItem.ID := 0;
+  lItem.PEDIDO := lPedido;
+  lItem.ITEM_CARDAPIO := lCardapio;
+  lItem.QUANTIDADE := lBody.GetValue<integer>('quantidade');
 
   lResult := lController.ITEM_PEDIDO.Save(lItem);
 
@@ -367,7 +381,7 @@ end;
 procedure EditItem(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var
   lID: Integer;
-  lValue,s: string;
+  lValue, s: string;
   lResult, lBody: TJSONObject;
   lController: iControllerServerDelivery;
   lItemPedido, lItemPedidoFound: TITEM_PEDIDO;
@@ -386,12 +400,12 @@ begin
     Res.Send(TJSONObject.Create().AddPair('Message', 'ID inválida').ToJSON).Status(THTTPStatus.NotFound);
     exit;
   end;
-   s := lBody.ToJSON;
+  s := lBody.ToJSON;
   lItemPedidoFound := TJSON.JsonToObject<TITEM_PEDIDO>(lBody);
 
   lItemPedido := TJSON.JsonToObject<TITEM_PEDIDO>(Req.Body);
 
-  lItemPedido.ITEM_CARDAPIO :=  TJSON.JsonToObject<TCARDAPIO>(lBody.GetValue<TJSONObject>('itemCardapio'));
+  lItemPedido.ITEM_CARDAPIO := TJSON.JsonToObject<TCARDAPIO>(lBody.GetValue<TJSONObject>('itemCardapio'));
 
   lItemPedido.ID := lItemPedidoFound.ID;
 

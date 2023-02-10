@@ -81,13 +81,16 @@ type
 
   TTIPOPGTO = class
   private
-    FDESCRICAO: string;
     FID: Integer;
-    procedure SetDESCRICAO(const Value: string);
+    FDESCRICAO: string;
+    FVALOR_PAGO: Double;
     procedure SetID(const Value: Integer);
+    procedure SetDESCRICAO(const Value: string);
+    procedure SetVALOR_PAGO(const Value: Double);
   public
     property ID: Integer read FID write SetID;
     property DESCRICAO: string read FDESCRICAO write SetDESCRICAO;
+    property VALOR_PAGO: Double read FVALOR_PAGO write SetVALOR_PAGO;
   end;
 
   TTIPO_CARDAPIO = class
@@ -428,7 +431,7 @@ end;
 procedure TITEM_PEDIDO.SetQUANTIDADE(const Value: Integer);
 begin
   FQUANTIDADE := Value;
-  FTOTAL :=  FloatToCurr(FITEM_CARDAPIO.PRECO * FQUANTIDADE);
+  FTOTAL := FloatToCurr(FITEM_CARDAPIO.PRECO * FQUANTIDADE);
 end;
 
 { TTIPOPGTO }
@@ -441,6 +444,11 @@ end;
 procedure TTIPOPGTO.SetID(const Value: Integer);
 begin
   FID := Value;
+end;
+
+procedure TTIPOPGTO.SetVALOR_PAGO(const Value: Double);
+begin
+  FVALOR_PAGO := Value;
 end;
 
 { TCAIXA }

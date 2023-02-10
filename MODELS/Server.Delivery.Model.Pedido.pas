@@ -373,11 +373,12 @@ begin
       begin
       for aTipoPgto in aValue.TIPO_PAGAMENTO do
         begin
-          FSQL := 'INSERT INTO PEDIDOS_TIPOS_PAGAMENTOS (ID_PEDIDO, ID_TIPO_PAGAMENTO) VALUES(:ID_PEDIDO, :ID_TIPO_PAGAMENTO);';
+          FSQL := 'INSERT INTO PEDIDOS_TIPOS_PAGAMENTOS (ID, ID_PEDIDO, ID_TIPO_PAGAMENTO, VALOR) VALUES (Null, :ID_PEDIDO, :ID_TIPO_PAGAMENTO, :VALOR);';
           SQL.Text := FSQL;
 
           ParamByName('ID_PEDIDO').Value := aValue.ID;
           ParamByName('ID_TIPO_PAGAMENTO').Value := aTipoPgto.ID;
+          ParamByName('VALOR').Value := aTipoPgto.VALOR_PAGO;
           ExecSQL;
         end;
       end;
