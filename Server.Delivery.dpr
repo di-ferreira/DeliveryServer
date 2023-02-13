@@ -2,6 +2,7 @@ program Server.Delivery;
 
 uses
   Vcl.Forms,
+  uTInject.ConfigCEF,
   View.Main.Server in 'View.Main.Server.pas' {ViewMainServer},
   DM.Server in 'DM.Server.pas' {DataModule1: TDataModule},
   Server.Delivery.SQLite.Connection in 'MODELS\Server.Delivery.SQLite.Connection.pas',
@@ -28,11 +29,19 @@ uses
   Fnc_Utils in 'UTILS\Fnc_Utils.pas',
   Server.Delivery.Model.Pedido in 'MODELS\Server.Delivery.Model.Pedido.pas',
   Server.Delivery.Model.ItemPedido in 'MODELS\Server.Delivery.Model.ItemPedido.pas',
-  Controllers.Server.Delivery.Pedido.Route in 'CONTROLLERS\Controllers.Server.Delivery.Pedido.Route.pas';
+  Controllers.Server.Delivery.Pedido.Route in 'CONTROLLERS\Controllers.Server.Delivery.Pedido.Route.pas',
+  Server.Delivery.Bot.Chat in 'BOT\Server.Delivery.Bot.Chat.pas',
+  Server.Delivery.Bot.Manager in 'BOT\Server.Delivery.Bot.Manager.pas',
+  Server.Delivery.Bot.Resposta.Chat in 'BOT\Server.Delivery.Bot.Resposta.Chat.pas',
+  Server.Delivery.Controller.Bot in 'BOT\Server.Delivery.Controller.Bot.pas';
 
 {$R *.res}
 
 begin
+
+  if not GlobalCEFApp.StartMainProcess then
+    Exit;
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TViewMainServer, ViewMainServer);

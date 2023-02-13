@@ -16,3 +16,5 @@
 /TEST/Server.Delivery.Test.dproj.local
 /*/node_modules
 /*/*.lock
+/BIN
+/DCU

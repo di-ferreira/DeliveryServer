@@ -133,6 +133,10 @@
         <DCCReference Include="MODELS\Server.Delivery.Model.Pedido.pas"/>
         <DCCReference Include="MODELS\Server.Delivery.Model.ItemPedido.pas"/>
         <DCCReference Include="CONTROLLERS\Controllers.Server.Delivery.Pedido.Route.pas"/>
+        <DCCReference Include="BOT\Server.Delivery.Bot.Chat.pas"/>
+        <DCCReference Include="BOT\Server.Delivery.Bot.Manager.pas"/>
+        <DCCReference Include="BOT\Server.Delivery.Bot.Resposta.Chat.pas"/>
+        <DCCReference Include="BOT\Server.Delivery.Controller.Bot.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
