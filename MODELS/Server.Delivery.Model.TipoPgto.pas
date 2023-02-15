@@ -31,6 +31,8 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: TTIPOPGTO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TTIPOPGTO>;
+    function ListOne(aID: Integer): TTIPOPGTO;
   end;
 
 implementation
@@ -95,6 +97,16 @@ begin
     Open;
   end;
   Result := FQuery.ToJSONObject();
+end;
+
+function TModelServerDeliveryTipoPgto.ListAll: TObjectList<TTIPOPGTO>;
+begin
+
+end;
+
+function TModelServerDeliveryTipoPgto.ListOne(aID: Integer): TTIPOPGTO;
+begin
+
 end;
 
 class function TModelServerDeliveryTipoPgto.New: iModelServerDelivery<TTIPOPGTO>;

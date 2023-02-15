@@ -32,6 +32,8 @@ type
     function Update(aValue: TCLIENTE): TJSONObject;
     function Delete(aID: Integer): TJSONObject; overload;
     function Delete(aValue: string): TJSONObject; overload;
+    function ListAll: TObjectList<TCLIENTE>;
+    function ListOne(aID: Integer): TCLIENTE;
   end;
 
 implementation
@@ -134,6 +136,16 @@ begin
     Open;
   end;
   Result := FQuery.ToJSONObject();
+end;
+
+function TModelServerDeliveryCliente.ListAll: TObjectList<TCLIENTE>;
+begin
+
+end;
+
+function TModelServerDeliveryCliente.ListOne(aID: Integer): TCLIENTE;
+begin
+
 end;
 
 class function TModelServerDeliveryCliente.New: iModelServerDeliveryCliente<TCLIENTE>;

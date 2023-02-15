@@ -30,7 +30,7 @@ object ViewMainServer: TViewMainServer
     Top = 248
     Width = 249
     Height = 49
-    Caption = 'BOT'
+    Caption = 'CONNECT BOT'
     TabOrder = 4
     OnClick = BtnBotClick
   end
@@ -125,6 +125,7 @@ object ViewMainServer: TViewMainServer
     AjustNumber.LengthPhone = 8
     AjustNumber.DDIDefault = 55
     FormQrCodeType = Ft_Http
+    OnGetUnReadMessages = BotGetUnReadMessages
     Left = 224
     Top = 304
   end

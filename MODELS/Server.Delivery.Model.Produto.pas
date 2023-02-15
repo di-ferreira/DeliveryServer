@@ -21,6 +21,8 @@ type
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
+    FPRODUTO: TPRODUTO;
+    FPRODUTOS: TObjectList<TPRODUTO>;
     FSQL: string;
   public
     constructor Create;
@@ -31,6 +33,8 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: TPRODUTO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TPRODUTO>;
+    function ListOne(aID: Integer): TPRODUTO;
   end;
 
 implementation
@@ -41,6 +45,8 @@ begin
   FConnection := TServerDeliverySQLiteConnection.New;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
+  FPRODUTO := TPRODUTO.Create;
+  FPRODUTOS := TObjectList<TPRODUTO>.Create;
   FConnection.Connection.TxOptions.AutoCommit := False;
 end;
 
@@ -69,6 +75,8 @@ end;
 destructor TModelServerDeliveryProduto.Destroy;
 begin
   FreeAndNil(FQuery);
+  FreeAndNil(FPRODUTO);
+  FreeAndNil(FPRODUTOS);
   inherited;
 end;
 
@@ -96,6 +104,30 @@ begin
     Open;
   end;
   Result := FQuery.ToJSONObject();
+end;
+
+function TModelServerDeliveryProduto.ListAll: TObjectList<TPRODUTO>;
+begin
+
+end;
+
+function TModelServerDeliveryProduto.ListOne(aID: Integer): TPRODUTO;
+begin
+  FSQL := 'SELECT ID, NOME, ESTOQUE, CUSTO, PERCENTUAL_LUCRO AS LUCRO FROM PRODUTOS WHERE ID=:ID';
+
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    ParamByName('ID').Value := aID;
+    Open;
+    FPRODUTO.ID := FieldByName('ID').AsInteger;
+    FPRODUTO.NOME := FieldByName('NOME').AsString;
+    FPRODUTO.ESTOQUE := FieldByName('ESTOQUE').AsInteger;
+    FPRODUTO.CUSTO := FieldByName('CUSTO').AsFloat;
+    FPRODUTO.LUCRO := FieldByName('PERCENTUAL_LUCRO').AsFloat;
+  end;
+  Result := FPRODUTO;
 end;
 
 class function TModelServerDeliveryProduto.New: iModelServerDelivery<TPRODUTO>;

@@ -21,6 +21,7 @@ type
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
+    FTipos: TObjectList<TTIPO_CARDAPIO>;
     FSQL: string;
   public
     constructor Create;
@@ -31,6 +32,8 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: TTIPO_CARDAPIO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TTIPO_CARDAPIO>;
+    function ListOne(aID: Integer): TTIPO_CARDAPIO;
   end;
 
 implementation
@@ -41,6 +44,7 @@ begin
   FConnection := TServerDeliverySQLiteConnection.New;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
+  FTipos := TObjectList<TTIPO_CARDAPIO>.create;
   FConnection.Connection.TxOptions.AutoCommit := False;
 end;
 
@@ -69,6 +73,7 @@ end;
 destructor TModelServerDeliveryTipoCardapio.Destroy;
 begin
   FreeAndNil(FQuery);
+  FreeAndNil(FTipos);
   inherited;
 end;
 
@@ -95,6 +100,37 @@ begin
     Open;
   end;
   Result := FQuery.ToJSONObject();
+end;
+
+function TModelServerDeliveryTipoCardapio.ListAll: TObjectList<TTIPO_CARDAPIO>;
+var
+  aTipo: TTIPO_CARDAPIO;
+begin
+  FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO;';
+  with FQuery do
+  begin
+    Close;
+    SQL.Text := FSQL;
+    Open;
+
+    if RecordCount > 0 then
+      First;
+    while (not Eof) do
+    begin
+      aTipo := TTIPO_CARDAPIO.Create;
+      aTipo.ID := FieldByName('id').AsInteger;
+      aTipo.DESCRICAO := FieldByName('descricao').AsString;
+      FTipos.Add(aTipo);
+      Next;
+    end;
+  end;
+
+  Result := FTipos;
+end;
+
+function TModelServerDeliveryTipoCardapio.ListOne(aID: Integer): TTIPO_CARDAPIO;
+begin
+
 end;
 
 class function TModelServerDeliveryTipoCardapio.New: iModelServerDelivery<TTIPO_CARDAPIO>;

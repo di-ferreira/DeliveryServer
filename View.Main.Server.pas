@@ -34,7 +34,9 @@ uses
   uTInject.Config, uTInject.Classes,
   Server.Delivery.Controller.Routes,
   Server.Delivery.Bot.Manager,
-  Server.Delivery.Bot.Resposta.Chat, Server.Delivery.Bot.Chat;
+  Server.Delivery.Bot.Resposta.Chat,
+  Server.Delivery.Bot.Chat,
+  System.StrUtils;
 {*)}
 
 type
@@ -57,8 +59,9 @@ type
     procedure PPServerClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure BtnBotClick(Sender: TObject);
+    procedure BotGetUnReadMessages(const Chats: TChatList);
   private
-    pManagerBot:TServerDeliveryBotManager;
+    pManagerBot: TServerDeliveryBotManager;
     pRespostas: TServerDeliveryBotRespostaChat;
     pCurrentChat: TServerDeliveryBotChat;
     procedure CreateServer;
@@ -73,7 +76,9 @@ type
 
 var
   ViewMainServer: TViewMainServer;
-  CONST  CONVERTO_TO_MILISEGUNDOS = 60000;
+
+const
+  CONVERTO_TO_MILISEGUNDOS = 60000;
 
 implementation
 
@@ -90,8 +95,20 @@ begin
   TrayIcon.ShowBalloonHint;
 end;
 
+procedure TViewMainServer.BotGetUnReadMessages(const Chats: TChatList);
+begin
+  pManagerBot.AdministrarChatList(Bot, Chats);
+end;
+
 procedure TViewMainServer.BtnBotClick(Sender: TObject);
 begin
+  if Bot.IsConnected then
+  begin
+    BtnBot.Caption := 'DISCONNECT BOT';
+    Bot.Disconnect;
+    exit;
+  end;
+  BtnBot.Caption := 'CONNECT BOT';
   StartBot;
 end;
 
@@ -103,7 +120,6 @@ end;
 procedure TViewMainServer.CreateServer;
 begin
   THorse.Use(Cors).Use(Compression()).Use(Jhonson('UTF-8'));
-
 end;
 
 procedure TViewMainServer.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -122,15 +138,46 @@ end;
 procedure TViewMainServer.ManagerInteraction(aChat: TServerDeliveryBotChat);
 begin
   pCurrentChat := aChat;
+  pRespostas.CurrentChat := pCurrentChat;
+
   case aChat.Situacao of
-    saIndefinido: ;
-    saNova: ;
-    saNaFila: ;
-    saEmAtendimento: ;
-    saAguardandoPedido: ;
-    saFinalizada: ;
-    saAtendente: ;
-    saInativa: ;
+    saIndefinido:
+      ;
+    saNova:
+      begin
+          pCurrentChat := pRespostas.WelcomeMessage(aChat);
+      end;
+    saNaFila:
+      ;
+    saEmAtendimento:
+      begin
+        case aChat.Etapa of
+          // envia lista com cardápio por tipo
+                1:
+              case AnsiIndexStr(aChat.Resposta, ['1', '2']) of
+                0:
+                  pCurrentChat := pRespostas.SendCardapio(aChat);
+                1:
+                  pCurrentChat := pRespostas.WelcomeMessage(aChat);
+//                  2:
+//                    Enviar_ConfimarAtendente();
+              else
+                if pCurrentChat.Resposta <> '' then
+//                  SendInvalidMsg;
+              end;
+           2:
+             begin
+             end;
+        end;
+      end;
+    saAguardandoPedido:
+      ;
+    saFinalizada:
+      ;
+    saAtendente:
+      ;
+    saInativa:
+      ;
   end;
 end;
 

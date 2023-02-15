@@ -13,6 +13,8 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: T): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<T>;
+    function ListOne(aID: Integer): T;
   end;
 
   iModelServerDeliveryCliente<T: class, constructor> = interface(iModelServerDelivery<T>)
@@ -29,6 +31,7 @@ type
   iModelServerDeliveryCardapio<T: class, constructor> = interface(iModelServerDelivery<T>)
     ['{1834A103-1A77-450A-BFD6-89981EB9CB0D}']
     function GetByTipo(aID_TIPO: Integer): TJSONArray;
+    function ListByTipo(aID_TIPO: Integer): TObjectList<T>;
   end;
 
   iModelServerDeliveryCaixa<T: class, constructor> = interface(iModelServerDelivery<T>)

@@ -36,6 +36,8 @@ type
     function CloseCaixa(aID: Integer): TJSONObject;
     function Update(aValue: TCAIXA): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TCAIXA>;
+    function ListOne(aID: Integer): TCAIXA;
   end;
 
 implementation
@@ -195,6 +197,16 @@ begin
       end;
     end;
   end;
+end;
+
+function TModelServerDeliveryCaixa.ListAll: TObjectList<TCAIXA>;
+begin
+
+end;
+
+function TModelServerDeliveryCaixa.ListOne(aID: Integer): TCAIXA;
+begin
+
 end;
 
 class function TModelServerDeliveryCaixa.New: iModelServerDeliveryCaixa<TCAIXA>;

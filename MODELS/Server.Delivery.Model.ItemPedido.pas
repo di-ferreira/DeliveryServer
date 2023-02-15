@@ -32,6 +32,8 @@ type
     function GetByPedido(aIDPedido: Integer): TJSONArray;
     function Update(aValue: TITEM_PEDIDO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TITEM_PEDIDO>;
+    function ListOne(aID: Integer): TITEM_PEDIDO;
   end;
 
 implementation
@@ -137,7 +139,6 @@ begin
 
   lItems := FQuery.ToJSONArray();
 
-
   for I := 0 to Pred(lItems.Count) do
   begin
     lItem := TJSONObject.Create;
@@ -150,6 +151,16 @@ begin
   end;
 
   Result := lItemsResult;
+end;
+
+function TModelServerDeliveryItemPedido.ListAll: TObjectList<TITEM_PEDIDO>;
+begin
+
+end;
+
+function TModelServerDeliveryItemPedido.ListOne(aID: Integer): TITEM_PEDIDO;
+begin
+
 end;
 
 class function TModelServerDeliveryItemPedido.New: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;

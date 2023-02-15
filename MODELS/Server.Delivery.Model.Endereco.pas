@@ -31,6 +31,8 @@ type
     function GetByID(aID: Integer): TJSONObject;
     function Update(aValue: TENDERECO): TJSONObject;
     function Delete(aID: Integer): TJSONObject; overload;
+    function ListAll: TObjectList<TENDERECO>;
+    function ListOne(aID: Integer): TENDERECO;
   end;
 
 implementation
@@ -117,6 +119,16 @@ begin
   lEndereco := FQuery.ToJSONObject();
 
   Result := lEndereco;
+end;
+
+function TModelServerDeliveryEndereco.ListAll: TObjectList<TENDERECO>;
+begin
+
+end;
+
+function TModelServerDeliveryEndereco.ListOne(aID: Integer): TENDERECO;
+begin
+
 end;
 
 class function TModelServerDeliveryEndereco.New: iModelServerDeliveryEndereco<TENDERECO>;

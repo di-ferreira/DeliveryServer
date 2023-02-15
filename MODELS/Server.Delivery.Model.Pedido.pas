@@ -34,6 +34,8 @@ type
     function GetByCliente(aIDCliente: Integer): TJSONArray;
     function Update(aValue: TPEDIDO): TJSONObject;
     function Delete(aID: Integer): TJSONObject;
+    function ListAll: TObjectList<TPEDIDO>;
+    function ListOne(aID: Integer): TPEDIDO;
   end;
 
 implementation
@@ -225,12 +227,7 @@ end;
 
 function TModelServerDeliveryPedido.GetByID(aID: Integer): TJSONObject;
 var
-  CaixaJSON,
-  ClienteJSON,
-  EnderecoJSON,
-  PedidoJSON,
-  lItemJSON,
-  PedidoJSONSearch: TJSONObject;
+  CaixaJSON, ClienteJSON, EnderecoJSON, PedidoJSON, lItemJSON, PedidoJSONSearch: TJSONObject;
   lItemsJSONResult: TJSONArray;
   lController: iControllerServerDelivery;
   I, J: Integer;
@@ -253,20 +250,29 @@ begin
 
     lItemsJSONResult := TJSONArray.Create;
 
+    lItemsJSONResult := lController.ITEM_PEDIDO.GetByPedido(PedidoJSONSearch.GetValue<integer>('id'));
 
-      lItemsJSONResult := lController.ITEM_PEDIDO.GetByPedido(PedidoJSONSearch.GetValue<integer>('id'));
+    ClienteJSON := lController.CLIENTE.GetByID(PedidoJSONSearch.GetValue<integer>('cliente'));
 
-      ClienteJSON := lController.CLIENTE.GetByID(PedidoJSONSearch.GetValue<integer>('cliente'));
+    EnderecoJSON := lController.ENDERECO.GetByID(PedidoJSONSearch.GetValue<integer>('enderecoEntrega'));
 
-      EnderecoJSON := lController.ENDERECO.GetByID(PedidoJSONSearch.GetValue<integer>('enderecoEntrega'));
+    CaixaJSON := lController.CAIXA.GetByID(PedidoJSONSearch.GetValue<integer>('caixa'));
 
-      CaixaJSON := lController.CAIXA.GetByID(PedidoJSONSearch.GetValue<integer>('caixa'));
-
-      PedidoJSON := TJSONObject.Create;
-      PedidoJSON.AddPair('id', PedidoJSONSearch.GetValue<integer>('id')).AddPair('dataPedido', FormatDateTime('dd-mm-yy hh:mm:ss', PedidoJSONSearch.GetValue<TDateTime>('dataPedido'))).AddPair('items', lItemsJSONResult).AddPair('total', PedidoJSONSearch.GetValue<Double>('total')).AddPair('cancelado', PedidoJSONSearch.GetValue<Boolean>('cancelado')).AddPair('aberto', PedidoJSONSearch.GetValue<Boolean>('aberto')).AddPair('obs', PedidoJSONSearch.GetValue<string>('obs')).AddPair('cliente', ClienteJSON).AddPair('enderecoEntrega', EnderecoJSON).AddPair('caixa', CaixaJSON);
+    PedidoJSON := TJSONObject.Create;
+    PedidoJSON.AddPair('id', PedidoJSONSearch.GetValue<integer>('id')).AddPair('dataPedido', FormatDateTime('dd-mm-yy hh:mm:ss', PedidoJSONSearch.GetValue<TDateTime>('dataPedido'))).AddPair('items', lItemsJSONResult).AddPair('total', PedidoJSONSearch.GetValue<Double>('total')).AddPair('cancelado', PedidoJSONSearch.GetValue<Boolean>('cancelado')).AddPair('aberto', PedidoJSONSearch.GetValue<Boolean>('aberto')).AddPair('obs', PedidoJSONSearch.GetValue<string>('obs')).AddPair('cliente', ClienteJSON).AddPair('enderecoEntrega', EnderecoJSON).AddPair('caixa', CaixaJSON);
   end;
 
   Result := PedidoJSON;
+end;
+
+function TModelServerDeliveryPedido.ListAll: TObjectList<TPEDIDO>;
+begin
+
+end;
+
+function TModelServerDeliveryPedido.ListOne(aID: Integer): TPEDIDO;
+begin
+
 end;
 
 class function TModelServerDeliveryPedido.New: iModelServerDeliveryPedido<TPEDIDO>;
@@ -351,8 +357,8 @@ end;
 
 function TModelServerDeliveryPedido.Update(aValue: TPEDIDO): TJSONObject;
 var
-  aPedido:TJSONObject;
-  aTipoPgto:TTIPOPGTO;
+  aPedido: TJSONObject;
+  aTipoPgto: TTIPOPGTO;
 begin
   FSQL := 'UPDATE PEDIDOS SET TOTAL=:TOTAL, CANCELADO=:CANCELADO, ABERTO=:ABERTO, OBS=:OBS, ENDERECO_ENTREGA=:ENDERECO_ENTREGA WHERE ID=:ID;';
   try
@@ -371,7 +377,7 @@ begin
 
       if aValue.TIPO_PAGAMENTO.Count > 0 then
       begin
-      for aTipoPgto in aValue.TIPO_PAGAMENTO do
+        for aTipoPgto in aValue.TIPO_PAGAMENTO do
         begin
           FSQL := 'INSERT INTO PEDIDOS_TIPOS_PAGAMENTOS (ID, ID_PEDIDO, ID_TIPO_PAGAMENTO, VALOR) VALUES (Null, :ID_PEDIDO, :ID_TIPO_PAGAMENTO, :VALOR);';
           SQL.Text := FSQL;
