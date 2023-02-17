@@ -15,12 +15,14 @@ uses
   Server.Delivery.Controller,
   Server.Delivery.Controller.Interfaces;
  {*)}
+
 type
   TServerDeliveryBotRespostaChat = class
   private
     FBot: TInject;
     FCurrentChat: TServerDeliveryBotChat;
     FController: iControllerServerDelivery;
+    FTipos: TObjectList<TTIPO_CARDAPIO>;
     procedure SetBot(const Value: TInject);
     procedure SetCurrentChat(const Value: TServerDeliveryBotChat);
     procedure SendMessage(aStep: Integer; aMessage: string; aAttach: string = ''; aType: Integer = 0);
@@ -31,6 +33,7 @@ type
     property CurrentChat: TServerDeliveryBotChat read FCurrentChat write SetCurrentChat;
     function WelcomeMessage(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
     function SendCardapio(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
+    function SendItensCardapio(aChat: TServerDeliveryBotChat; NumeroResposta: Integer): TServerDeliveryBotChat;
   end;
 
 implementation
@@ -82,32 +85,45 @@ end;
 function TServerDeliveryBotRespostaChat.SendCardapio(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
 var
   aMsg: string;
-  aTipos: TObjectList<TTIPO_CARDAPIO>;
-  aCardapios: TObjectList<TCARDAPIO>;
-  aCardapio: TCARDAPIO;
-  I:Integer;
+  I: Integer;
 begin
-//  aChat.Situacao := saEmAtendimento;
-  aChat.Situacao := saNova;
+  aChat.Situacao := saEmAtendimento;
 
-  aTipos := FController.TIPO_CARDAPIO.ListAll;
+  FTipos := FController.TIPO_CARDAPIO.ListAll;
 
-  aMsg := '-- *CARDÁPIO* -- \n \n';
+  aMsg := Bot.Emoticons.AtendenteM + '-- *O que deseja?* -- \n \n';
 
-  for I := 0 to Pred(aTipos.Count) do
+  for I := 0 to Pred(FTipos.Count) do
   begin
-      aCardapios := FController.CARDAPIO.ListByTipo(aTipos.Items[I].ID);
-
-      aMsg := aMsg + '- *' + Trim(aTipos.Items[I].DESCRICAO.ToUpper) + '* - \n ';
-
-      for aCardapio in aCardapios do
-      begin
-        aMsg := aMsg + '*' + Trim(aCardapio.DESCRICAO) + '*  _______  ' + FormatFloat('R$ #,##0.00', aCardapio.PRECO) + ' \n';
-      end;
-      aMsg := aMsg + '\n';
+    aMsg := aMsg + '*' + I.ToString + '* - ' + Trim(FTipos.Items[I].DESCRICAO.ToUpper) + ' - \n ';
+    aMsg := aMsg + '\n';
   end;
 
   SendMessage(2, aMsg);
+  Result := FCurrentChat;
+end;
+
+function TServerDeliveryBotRespostaChat.SendItensCardapio(aChat: TServerDeliveryBotChat; NumeroResposta: Integer): TServerDeliveryBotChat;
+var
+  aMsg: string;
+  aCardapios: TObjectList<TCARDAPIO>;
+  aCardapio: TCARDAPIO;
+begin
+  aChat.Situacao := saEmAtendimento;
+
+  aMsg := Bot.Emoticons.AtendenteM + '-- *O que deseja?* -- \n \n';
+  aCardapios := FController.CARDAPIO.ListByTipo(FTipos.Items[NumeroResposta].ID);
+
+  for aCardapio in aCardapios do
+  begin
+    aMsg := aMsg + '*' + aCardapio.ID.ToString + '* - ' + Trim(aCardapio.DESCRICAO) + '_______' +
+            FormatFloat('R$ #,##0.00', aCardapio.PRECO) + ' \n\n';
+  end;
+    aMsg := aMsg + 'Deseja adicionar ao pedido?\n\n';
+
+    aMsg := aMsg + '*SIM NÃO* \n';
+
+  SendMessage(FCurrentChat.Etapa, aMsg);
   Result := FCurrentChat;
 end;
 

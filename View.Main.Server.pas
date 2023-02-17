@@ -136,6 +136,9 @@ begin
 end;
 
 procedure TViewMainServer.ManagerInteraction(aChat: TServerDeliveryBotChat);
+var
+  NumeroResposta: integer;
+  ValueResposta: string;
 begin
   pCurrentChat := aChat;
   pRespostas.CurrentChat := pCurrentChat;
@@ -145,7 +148,7 @@ begin
       ;
     saNova:
       begin
-          pCurrentChat := pRespostas.WelcomeMessage(aChat);
+        pCurrentChat := pRespostas.WelcomeMessage(aChat);
       end;
     saNaFila:
       ;
@@ -153,21 +156,38 @@ begin
       begin
         case aChat.Etapa of
           // envia lista com cardápio por tipo
-                1:
-              case AnsiIndexStr(aChat.Resposta, ['1', '2']) of
-                0:
-                  pCurrentChat := pRespostas.SendCardapio(aChat);
-                1:
-                  pCurrentChat := pRespostas.WelcomeMessage(aChat);
+          1:
+            case AnsiIndexStr(aChat.Resposta, ['1', '2']) of
+              0:
+                pCurrentChat := pRespostas.SendCardapio(aChat);
+              1:
+                pCurrentChat := pRespostas.WelcomeMessage(aChat);
 //                  2:
 //                    Enviar_ConfimarAtendente();
-              else
-                if pCurrentChat.Resposta <> '' then
+            else
+              if pCurrentChat.Resposta <> '' then
 //                  SendInvalidMsg;
-              end;
-           2:
-             begin
-             end;
+
+
+
+            end;
+          2:
+            begin
+              ValueResposta := aChat.Resposta;
+              if TryStrToInt(ValueResposta, NumeroResposta) then
+                pCurrentChat := pRespostas.SendItensCardapio(aChat, NumeroResposta)
+              else
+                case AnsiIndexStr(aChat.Resposta, ['SIM', 'NÃO.NAO']) of
+                  1:
+                    begin
+
+                    end;
+                  2:
+                    begin
+
+                    end;
+                end;
+            end;
         end;
       end;
     saAguardandoPedido:
