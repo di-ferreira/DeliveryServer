@@ -33,6 +33,7 @@ type
     property CurrentChat: TServerDeliveryBotChat read FCurrentChat write SetCurrentChat;
     function WelcomeMessage(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
     function SendCardapio(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
+    function SendMensagemInvalida(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
     function SendItensCardapio(aChat: TServerDeliveryBotChat; NumeroResposta: Integer): TServerDeliveryBotChat;
   end;
 
@@ -88,6 +89,8 @@ var
   I: Integer;
 begin
   aChat.Situacao := saEmAtendimento;
+  if Assigned(FTipos) then
+    FTipos := nil;
 
   FTipos := FController.TIPO_CARDAPIO.ListAll;
 
@@ -108,20 +111,37 @@ var
   aMsg: string;
   aCardapios: TObjectList<TCARDAPIO>;
   aCardapio: TCARDAPIO;
+  id: integer;
 begin
   aChat.Situacao := saEmAtendimento;
 
-  aMsg := Bot.Emoticons.AtendenteM + '-- *O que deseja?* -- \n \n';
-  aCardapios := FController.CARDAPIO.ListByTipo(FTipos.Items[NumeroResposta].ID);
+  aMsg := Bot.Emoticons.AtendenteM + '-- *O que deseja?* -- \n';
+  aMsg := '*Para adicionar ao pedido digite o número do item* \n \n';
+
+  id := FTipos.Items[NumeroResposta].id;
+
+  aCardapios := FController.CARDAPIO.ListByTipo(id);
 
   for aCardapio in aCardapios do
   begin
-    aMsg := aMsg + '*' + aCardapio.ID.ToString + '* - ' + Trim(aCardapio.DESCRICAO) + '_______' +
-            FormatFloat('R$ #,##0.00', aCardapio.PRECO) + ' \n\n';
+    aMsg := aMsg + '*' + aCardapio.ID.ToString + '* - ' + Trim(aCardapio.DESCRICAO) + '_______' + FormatFloat('R$ #,##0.00', aCardapio.PRECO) + ' \n\n';
   end;
-    aMsg := aMsg + 'Deseja adicionar ao pedido?\n\n';
+  aMsg := aMsg + '0 - Voltar ao cardápio\n\n';
 
-    aMsg := aMsg + '*SIM NÃO* \n';
+//    aMsg := aMsg + '*SIM NÃO* \n';
+
+  SendMessage(FCurrentChat.Etapa, aMsg);
+  Result := FCurrentChat;
+end;
+
+function TServerDeliveryBotRespostaChat.SendMensagemInvalida(aChat: TServerDeliveryBotChat): TServerDeliveryBotChat;
+var
+  aMsg: string;
+begin
+  aChat.Situacao := aChat.Situacao;
+
+  aMsg := '*Resposta Inválida* \n';
+  aMsg := 'Favor digite uma opção válida. \n';
 
   SendMessage(FCurrentChat.Etapa, aMsg);
   Result := FCurrentChat;

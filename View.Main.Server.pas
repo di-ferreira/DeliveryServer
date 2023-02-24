@@ -160,33 +160,20 @@ begin
             case AnsiIndexStr(aChat.Resposta, ['1', '2']) of
               0:
                 pCurrentChat := pRespostas.SendCardapio(aChat);
-              1:
-                pCurrentChat := pRespostas.WelcomeMessage(aChat);
-//                  2:
-//                    Enviar_ConfimarAtendente();
             else
-              if pCurrentChat.Resposta <> '' then
-//                  SendInvalidMsg;
-
-
-
+              pCurrentChat := pRespostas.SendMensagemInvalida(aChat);
             end;
+          // envia lista com itens do tipo cardápio
           2:
             begin
               ValueResposta := aChat.Resposta;
-              if TryStrToInt(ValueResposta, NumeroResposta) then
+
+              if TryStrToInt(ValueResposta, NumeroResposta) and (NumeroResposta > 0) then
                 pCurrentChat := pRespostas.SendItensCardapio(aChat, NumeroResposta)
+              else if TryStrToInt(ValueResposta, NumeroResposta) and (NumeroResposta = 0) then
+                pCurrentChat := pRespostas.SendCardapio(aChat)
               else
-                case AnsiIndexStr(aChat.Resposta, ['SIM', 'NÃO.NAO']) of
-                  1:
-                    begin
-
-                    end;
-                  2:
-                    begin
-
-                    end;
-                end;
+                pCurrentChat := pRespostas.SendMensagemInvalida(aChat);
             end;
         end;
       end;

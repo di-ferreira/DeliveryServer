@@ -105,6 +105,7 @@ end;
 function TModelServerDeliveryTipoCardapio.ListAll: TObjectList<TTIPO_CARDAPIO>;
 var
   aTipo: TTIPO_CARDAPIO;
+  aTipos: TObjectList<TTIPO_CARDAPIO>;
 begin
   FSQL := 'SELECT ID, DESCRICAO FROM TIPOS_CARDAPIO;';
   with FQuery do
@@ -114,18 +115,21 @@ begin
     Open;
 
     if RecordCount > 0 then
+    begin
       First;
+      aTipos := TObjectList<TTIPO_CARDAPIO>.Create;
+    end;
     while (not Eof) do
     begin
       aTipo := TTIPO_CARDAPIO.Create;
       aTipo.ID := FieldByName('id').AsInteger;
       aTipo.DESCRICAO := FieldByName('descricao').AsString;
-      FTipos.Add(aTipo);
+      aTipos.Add(aTipo);
       Next;
     end;
   end;
 
-  Result := FTipos;
+  Result := aTipos;
 end;
 
 function TModelServerDeliveryTipoCardapio.ListOne(aID: Integer): TTIPO_CARDAPIO;
