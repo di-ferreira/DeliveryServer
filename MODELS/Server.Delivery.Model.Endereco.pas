@@ -12,11 +12,11 @@ uses
   FireDAC.Comp.UI, Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
-  Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection, System.JSON;
+  Server.Delivery.DTO, Server.Delivery.Model.Interfaces, System.JSON, DM.Server;
 
 type
-  TModelServerDeliveryEndereco = class(TInterfacedObject, iModelServerDeliveryEndereco<TENDERECO>)
+  TModelServerDeliveryEndereco = class(TInterfacedObject,
+    iModelServerDeliveryEndereco<TENDERECO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -41,7 +41,7 @@ implementation
 
 constructor TModelServerDeliveryEndereco.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
@@ -131,7 +131,8 @@ begin
 
 end;
 
-class function TModelServerDeliveryEndereco.New: iModelServerDeliveryEndereco<TENDERECO>;
+class function TModelServerDeliveryEndereco.New
+  : iModelServerDeliveryEndereco<TENDERECO>;
 begin
   Result := Self.Create;
 end;
@@ -155,13 +156,24 @@ begin
       ParamByName('estado').Value := aValue.ESTADO;
       ParamByName('id_cliente').Value := aValue.CLIENTE.ID;
       ExecSQL;
-      FSQL := 'select enderecos.id, enderecos.rua, enderecos.numero, enderecos.bairro, enderecos.complemento, enderecos.cidade, enderecos.estado, enderecos.id_cliente, clientes.nome, clientes.contato from' + ' enderecos inner join clientes  on enderecos.id_cliente = clientes.id where enderecos.id = last_insert_rowid();';
+      FSQL := 'select enderecos.id, enderecos.rua, enderecos.numero, enderecos.bairro, enderecos.complemento, enderecos.cidade, enderecos.estado, enderecos.id_cliente, clientes.nome, clientes.contato from'
+        + ' enderecos inner join clientes  on enderecos.id_cliente = clientes.id where enderecos.id = last_insert_rowid();';
 
       Close;
       SQL.Text := FSQL;
       Open;
 
-      vResult := TJSONObject.Create().AddPair('id', FieldByName('id').AsInteger).AddPair('rua', FieldByName('rua').AsString).AddPair('numero', FieldByName('numero').AsString).AddPair('bairro', FieldByName('bairro').AsString).AddPair('complemento', FieldByName('complemento').AsString).AddPair('cidade', FieldByName('cidade').AsString).AddPair('estado', FieldByName('estado').AsString).AddPair('cliente', TJSONObject.Create().AddPair('id', FieldByName('id_cliente').AsInteger).AddPair('nome', FieldByName('nome').AsString).AddPair('contato', FieldByName('contato').AsString));
+      vResult := TJSONObject.Create().AddPair('id', FieldByName('id').AsInteger)
+        .AddPair('rua', FieldByName('rua').AsString)
+        .AddPair('numero', FieldByName('numero').AsString)
+        .AddPair('bairro', FieldByName('bairro').AsString)
+        .AddPair('complemento', FieldByName('complemento').AsString)
+        .AddPair('cidade', FieldByName('cidade').AsString)
+        .AddPair('estado', FieldByName('estado').AsString)
+        .AddPair('cliente', TJSONObject.Create().AddPair('id',
+        FieldByName('id_cliente').AsInteger).AddPair('nome',
+        FieldByName('nome').AsString).AddPair('contato',
+        FieldByName('contato').AsString));
 
       Connection.Commit;
       Result := vResult;
@@ -221,4 +233,3 @@ begin
 end;
 
 end.
-

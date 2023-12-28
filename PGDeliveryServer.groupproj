@@ -6,12 +6,6 @@
         <Projects Include="Server.Delivery.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="..\BotAtendente\Bot.dproj">
-            <Dependencies/>
-        </Projects>
-        <Projects Include="..\Curso-TInject\Server\PrjServer.dproj">
-            <Dependencies/>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -29,32 +23,14 @@
     <Target Name="Server_Delivery:Make">
         <MSBuild Projects="Server.Delivery.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Bot">
-        <MSBuild Projects="..\BotAtendente\Bot.dproj"/>
-    </Target>
-    <Target Name="Bot:Clean">
-        <MSBuild Projects="..\BotAtendente\Bot.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Bot:Make">
-        <MSBuild Projects="..\BotAtendente\Bot.dproj" Targets="Make"/>
-    </Target>
-    <Target Name="PrjServer">
-        <MSBuild Projects="..\Curso-TInject\Server\PrjServer.dproj"/>
-    </Target>
-    <Target Name="PrjServer:Clean">
-        <MSBuild Projects="..\Curso-TInject\Server\PrjServer.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="PrjServer:Make">
-        <MSBuild Projects="..\Curso-TInject\Server\PrjServer.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Server_Delivery;Bot;PrjServer"/>
+        <CallTarget Targets="Server_Delivery"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Server_Delivery:Clean;Bot:Clean;PrjServer:Clean"/>
+        <CallTarget Targets="Server_Delivery:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Server_Delivery:Make;Bot:Make;PrjServer:Make"/>
+        <CallTarget Targets="Server_Delivery:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

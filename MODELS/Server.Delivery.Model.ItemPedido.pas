@@ -3,7 +3,7 @@ unit Server.Delivery.Model.ItemPedido;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -14,10 +14,11 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
   Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  DM.Server;
 
 type
-  TModelServerDeliveryItemPedido = class(TInterfacedObject, iModelServerDeliveryItemPedido<TITEM_PEDIDO>)
+  TModelServerDeliveryItemPedido = class(TInterfacedObject,
+    iModelServerDeliveryItemPedido<TITEM_PEDIDO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -45,7 +46,7 @@ uses
 
 constructor TModelServerDeliveryItemPedido.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
@@ -108,14 +109,18 @@ begin
     lItemJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
     lItemJSON.AddPair('total', FQuery.FieldByName('TOTAL').AsFloat);
     lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE').AsInteger);
-    lItemJSON.AddPair('itemCardapio', lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO').AsInteger));
-    lItemJSON.AddPair('pedido', lController.PEDIDO.GetByID(FQuery.FieldByName('PEDIDO').AsInteger));
+    lItemJSON.AddPair('itemCardapio',
+      lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO')
+      .AsInteger));
+    lItemJSON.AddPair('pedido',
+      lController.PEDIDO.GetByID(FQuery.FieldByName('PEDIDO').AsInteger));
     Open;
   end;
   Result := lItemJSON;
 end;
 
-function TModelServerDeliveryItemPedido.GetByPedido(aIDPedido: Integer): TJSONArray;
+function TModelServerDeliveryItemPedido.GetByPedido(aIDPedido: Integer)
+  : TJSONArray;
 var
   lItems, lItemsResult: TJSONArray;
   lItem: TJSONObject;
@@ -142,10 +147,13 @@ begin
   for I := 0 to Pred(lItems.Count) do
   begin
     lItem := TJSONObject.Create;
-    lItem.AddPair('id', lItems.Items[I].GetValue<integer>('id'));
+    lItem.AddPair('id', lItems.Items[I].GetValue<Integer>('id'));
     lItem.AddPair('total', lItems.Items[I].GetValue<Double>('total'));
-    lItem.AddPair('quantidade', lItems.Items[I].GetValue<integer>('quantidade'));
-    lItem.AddPair('itemCardapio', lController.CARDAPIO.GetByID(lItems.Items[I].GetValue<integer>('itemCardapio')));
+    lItem.AddPair('quantidade', lItems.Items[I].GetValue<Integer>
+      ('quantidade'));
+    lItem.AddPair('itemCardapio',
+      lController.CARDAPIO.GetByID(lItems.Items[I].GetValue<Integer>
+      ('itemCardapio')));
 
     lItemsResult.Add(lItem);
   end;
@@ -163,7 +171,8 @@ begin
 
 end;
 
-class function TModelServerDeliveryItemPedido.New: iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
+class function TModelServerDeliveryItemPedido.New
+  : iModelServerDeliveryItemPedido<TITEM_PEDIDO>;
 begin
   Result := Self.Create;
 end;
@@ -195,8 +204,11 @@ begin
       lItemJSON := TJSONObject.Create;
       lItemJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
       lItemJSON.AddPair('total', FQuery.FieldByName('TOTAL').AsFloat);
-      lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE').AsInteger);
-      lItemJSON.AddPair('itemCardapio', lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO').AsInteger));
+      lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE')
+        .AsInteger);
+      lItemJSON.AddPair('itemCardapio',
+        lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO')
+        .AsInteger));
     end;
     Result := lItemJSON;
   except
@@ -212,7 +224,8 @@ begin
   end;
 end;
 
-function TModelServerDeliveryItemPedido.Update(aValue: TITEM_PEDIDO): TJSONObject;
+function TModelServerDeliveryItemPedido.Update(aValue: TITEM_PEDIDO)
+  : TJSONObject;
 var
   lItemJSON: TJSONObject;
   lController: iControllerServerDelivery;
@@ -239,8 +252,11 @@ begin
       lItemJSON := TJSONObject.Create;
       lItemJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
       lItemJSON.AddPair('total', FQuery.FieldByName('TOTAL').AsFloat);
-      lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE').AsInteger);
-      lItemJSON.AddPair('itemCardapio', lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO').AsInteger));
+      lItemJSON.AddPair('quantidade', FQuery.FieldByName('QUANTIDADE')
+        .AsInteger);
+      lItemJSON.AddPair('itemCardapio',
+        lController.CARDAPIO.GetByID(FQuery.FieldByName('ITEM_CARDAPIO')
+        .AsInteger));
     end;
     Result := lItemJSON;
   except
@@ -256,4 +272,3 @@ begin
 end;
 
 end.
-

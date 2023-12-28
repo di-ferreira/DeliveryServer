@@ -3,7 +3,7 @@ unit Server.Delivery.Model.Produto;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -13,11 +13,11 @@ uses
   FireDAC.Comp.UI, Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
-  Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  Server.Delivery.DTO, Server.Delivery.Model.Interfaces, DM.Server;
 
 type
-  TModelServerDeliveryProduto = class(TInterfacedObject, iModelServerDelivery<TPRODUTO>)
+  TModelServerDeliveryProduto = class(TInterfacedObject,
+    iModelServerDelivery<TPRODUTO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -38,11 +38,12 @@ type
   end;
 
 implementation
+
 { TModelServerDeliveryProduto }
 
 constructor TModelServerDeliveryProduto.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FPRODUTO := TPRODUTO.Create;
@@ -209,4 +210,3 @@ begin
 end;
 
 end.
-

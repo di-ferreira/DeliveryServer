@@ -84,7 +84,7 @@ begin
       AMessage := AChat.messages[Low(AChat.messages)];
 
       //Não considerar mensagens enviadas por mim
-      if not AMessage.sender.isMe then
+      if not AMessage.sender.fromMe then
       begin
         //Carregar Conversa e passar a mensagem
         ProcessarResposta(AMessage);

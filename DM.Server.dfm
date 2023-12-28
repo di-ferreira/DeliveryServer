@@ -1,4 +1,5 @@
-object DataModule1: TDataModule1
+object DataModuleServer: TDataModuleServer
+  OnCreate = DataModuleCreate
   Height = 480
   Width = 640
 end

@@ -3,7 +3,7 @@ unit Server.Delivery.Model.TipoPgto;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -14,10 +14,11 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
   Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  DM.Server;
 
 type
-  TModelServerDeliveryTipoPgto = class(TInterfacedObject, iModelServerDelivery<TTIPOPGTO>)
+  TModelServerDeliveryTipoPgto = class(TInterfacedObject,
+    iModelServerDelivery<TTIPOPGTO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -36,11 +37,12 @@ type
   end;
 
 implementation
+
 { TModelServerDeliveryTipoPgto }
 
 constructor TModelServerDeliveryTipoPgto.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
@@ -109,7 +111,8 @@ begin
 
 end;
 
-class function TModelServerDeliveryTipoPgto.New: iModelServerDelivery<TTIPOPGTO>;
+class function TModelServerDeliveryTipoPgto.New
+  : iModelServerDelivery<TTIPOPGTO>;
 begin
   Result := Self.Create;
 end;
@@ -182,4 +185,3 @@ begin
 end;
 
 end.
-

@@ -3,23 +3,32 @@ unit DM.Server;
 interface
 
 uses
-  System.SysUtils, System.Classes;
+  System.SysUtils,
+  System.Classes,
+  Server.Delivery.Model.Interfaces,
+  Server.Delivery.SQLite.Connection;
 
 type
-  TDataModule1 = class(TDataModule)
+  TDataModuleServer = class(TDataModule)
+    procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
   public
-    { Public declarations }
+
+    ServerConnection: iModelServerDeliveryConnection;
   end;
 
 var
-  DataModule1: TDataModule1;
+  DataModuleServer: TDataModuleServer;
 
 implementation
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
-
 {$R *.dfm}
+
+procedure TDataModuleServer.DataModuleCreate(Sender: TObject);
+begin
+  ServerConnection := TServerDeliverySQLiteConnection.New;
+end;
 
 end.

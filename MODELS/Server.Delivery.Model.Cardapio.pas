@@ -3,7 +3,7 @@ unit Server.Delivery.Model.Cardapio;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -14,10 +14,11 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
   Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  DM.Server;
 
 type
-  TModelServerDeliveryCardapio = class(TInterfacedObject, iModelServerDeliveryCardapio<TCARDAPIO>)
+  TModelServerDeliveryCardapio = class(TInterfacedObject,
+    iModelServerDeliveryCardapio<TCARDAPIO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -47,7 +48,7 @@ uses
 
 constructor TModelServerDeliveryCardapio.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FCardapios := TObjectList<TCARDAPIO>.Create;
   FQuery.Connection := FConnection.Connection;
@@ -119,7 +120,7 @@ var
   lCardapioJSON, lProdutoJSON: TJSONObject;
   lProdutos: TJSONArray;
   lController: iControllerServerDelivery;
-  I: integer;
+  I: Integer;
 begin
   lController := TControllerServerDelivery.New;
 
@@ -137,9 +138,11 @@ begin
     Open;
 
     lCardapioJSON.AddPair('id', FQuery.FieldByName('ID').AsInteger);
-    lCardapioJSON.AddPair('descricao', FQuery.FieldByName('DESCRICAO').AsString);
+    lCardapioJSON.AddPair('descricao', FQuery.FieldByName('DESCRICAO')
+      .AsString);
     lCardapioJSON.AddPair('preco', FQuery.FieldByName('PRECO').AsFloat);
-    lCardapioJSON.AddPair('tipo', lController.TIPO_CARDAPIO.GetByID(FQuery.FieldByName('TIPO').AsInteger));
+    lCardapioJSON.AddPair('tipo', lController.TIPO_CARDAPIO.GetByID
+      (FQuery.FieldByName('TIPO').AsInteger));
 
     FSQL := 'SELECT ID, ID_CARDAPIO, ID_PRODUTO FROM CARDAPIO_PRODUTO WHERE ID = :ID_CARDAPIO;';
     Close;
@@ -149,7 +152,8 @@ begin
 
     for I := 0 to Pred(FQuery.RecordCount) do
     begin
-      lProdutos.Add(lController.PRODUTO.GetByID(FieldByName('ID_PRODUTO').AsInteger));
+      lProdutos.Add(lController.PRODUTO.GetByID(FieldByName('ID_PRODUTO')
+        .AsInteger));
       FQuery.Next;
     end;
 
@@ -172,13 +176,19 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryCardapio.GetProdutoCardapio(aIDCardapio: Integer): TObjectList<TPRODUTO>;
+function TModelServerDeliveryCardapio.GetProdutoCardapio(aIDCardapio: Integer)
+  : TObjectList<TPRODUTO>;
 var
   aPRODUTOS: TObjectList<TPRODUTO>;
   aPRODUTO: TPRODUTO;
   aQuery: TFDQuery;
 begin
-  FSQL := 'SELECT P.ID AS ID, P.NOME AS NOME, P.ESTOQUE AS ESTOQUE,' + 'P.CUSTO AS CUSTO, P.PERCENTUAL_LUCRO AS PERCENTUAL ' + 'FROM CARDAPIO_PRODUTO CP ' + 'LEFT JOIN CARDAPIOS C ON CP.ID_CARDAPIO = C.ID ' + 'LEFT JOIN PRODUTOS P ON CP.ID_PRODUTO = P.ID ' + 'WHERE C.ID = :ID_CARDAPIO';
+  FSQL := 'SELECT P.ID AS ID, P.NOME AS NOME, P.ESTOQUE AS ESTOQUE,' +
+    'P.CUSTO AS CUSTO, P.PERCENTUAL_LUCRO AS PERCENTUAL ' +
+    'FROM CARDAPIO_PRODUTO CP ' +
+    'LEFT JOIN CARDAPIOS C ON CP.ID_CARDAPIO = C.ID ' +
+    'LEFT JOIN PRODUTOS P ON CP.ID_PRODUTO = P.ID ' +
+    'WHERE C.ID = :ID_CARDAPIO';
   try
     aQuery := TFDQuery.Create(nil);
     aQuery.Connection := FConnection.Connection;
@@ -240,11 +250,12 @@ begin
   Result := FCardapios;
 end;
 
-function TModelServerDeliveryCardapio.ListByTipo(aID_TIPO: Integer): TObjectList<TCARDAPIO>;
+function TModelServerDeliveryCardapio.ListByTipo(aID_TIPO: Integer)
+  : TObjectList<TCARDAPIO>;
 var
   aCardapios: TObjectList<TCARDAPIO>;
   aCardapio: TCARDAPIO;
-  I: integer;
+  I: Integer;
 begin
   FSQL := 'SELECT C.ID AS ID, C.DESCRICAO AS DESCRICAO, T.DESCRICAO AS TIPO, T.ID AS ID_TIPO FROM CARDAPIOS C LEFT JOIN TIPOS_CARDAPIO T ON T.ID = C.TIPO WHERE T.ID = :ID_TIPO;';
   try
@@ -254,24 +265,24 @@ begin
     FQuery.ParamByName('ID_TIPO').Value := aID_TIPO;
     FQuery.Open;
 
-//    if FQuery.RecordCount > 0 then
-//    begin
-//      FQuery.First;
-//      aCardapios := TObjectList<TCARDAPIO>.Create;
-//    end;
-//    while (not FQuery.Eof) do
-//    begin
-//        aCardapios.Insert(I, TCARDAPIO.Create);
-////          aCardapios.Items[I] := TCARDAPIO.Create;
-//        aCardapios.Items[I].TIPO_CARDAPIO := TTIPO_CARDAPIO.Create;
-//        aCardapios.Items[I].ID := FQuery.FieldByName('ID').AsInteger;
-//        aCardapios.Items[I].DESCRICAO := FQuery.FieldByName('DESCRICAO').AsString;
-//        aCardapios.Items[I].TIPO_CARDAPIO.ID := FQuery.FieldByName('ID_TIPO').AsInteger;
-//        aCardapios.Items[I].TIPO_CARDAPIO.DESCRICAO := FQuery.FieldByName('TIPO').AsString;
-//        aCardapios.Items[I].PRODUTO := GetProdutoCardapio(aCardapios.Items[I].ID);
-////          aCardapios.Add(aCardapio);
-//      FQuery.Next;
-//    end;
+    // if FQuery.RecordCount > 0 then
+    // begin
+    // FQuery.First;
+    // aCardapios := TObjectList<TCARDAPIO>.Create;
+    // end;
+    // while (not FQuery.Eof) do
+    // begin
+    // aCardapios.Insert(I, TCARDAPIO.Create);
+    /// /          aCardapios.Items[I] := TCARDAPIO.Create;
+    // aCardapios.Items[I].TIPO_CARDAPIO := TTIPO_CARDAPIO.Create;
+    // aCardapios.Items[I].ID := FQuery.FieldByName('ID').AsInteger;
+    // aCardapios.Items[I].DESCRICAO := FQuery.FieldByName('DESCRICAO').AsString;
+    // aCardapios.Items[I].TIPO_CARDAPIO.ID := FQuery.FieldByName('ID_TIPO').AsInteger;
+    // aCardapios.Items[I].TIPO_CARDAPIO.DESCRICAO := FQuery.FieldByName('TIPO').AsString;
+    // aCardapios.Items[I].PRODUTO := GetProdutoCardapio(aCardapios.Items[I].ID);
+    /// /          aCardapios.Add(aCardapio);
+    // FQuery.Next;
+    // end;
 
     if FQuery.RecordCount > 0 then
     begin
@@ -281,14 +292,18 @@ begin
       for I := 0 to Pred(FQuery.RecordCount) do
       begin
         aCardapios.Insert(I, TCARDAPIO.Create);
-//          aCardapios.Items[I] := TCARDAPIO.Create;
+        // aCardapios.Items[I] := TCARDAPIO.Create;
         aCardapios.Items[I].TIPO_CARDAPIO := TTIPO_CARDAPIO.Create;
         aCardapios.Items[I].ID := FQuery.FieldByName('ID').AsInteger;
-        aCardapios.Items[I].DESCRICAO := FQuery.FieldByName('DESCRICAO').AsString;
-        aCardapios.Items[I].TIPO_CARDAPIO.ID := FQuery.FieldByName('ID_TIPO').AsInteger;
-        aCardapios.Items[I].TIPO_CARDAPIO.DESCRICAO := FQuery.FieldByName('TIPO').AsString;
-        aCardapios.Items[I].PRODUTO := GetProdutoCardapio(aCardapios.Items[I].ID);
-//          aCardapios.Add(aCardapio);
+        aCardapios.Items[I].DESCRICAO :=
+          FQuery.FieldByName('DESCRICAO').AsString;
+        aCardapios.Items[I].TIPO_CARDAPIO.ID := FQuery.FieldByName('ID_TIPO')
+          .AsInteger;
+        aCardapios.Items[I].TIPO_CARDAPIO.DESCRICAO :=
+          FQuery.FieldByName('TIPO').AsString;
+        aCardapios.Items[I].PRODUTO :=
+          GetProdutoCardapio(aCardapios.Items[I].ID);
+        // aCardapios.Add(aCardapio);
         FQuery.Next;
       end;
     end;
@@ -307,7 +322,8 @@ begin
 
 end;
 
-class function TModelServerDeliveryCardapio.New: iModelServerDeliveryCardapio<TCARDAPIO>;
+class function TModelServerDeliveryCardapio.New
+  : iModelServerDeliveryCardapio<TCARDAPIO>;
 begin
   Result := Self.Create;
 end;
@@ -338,7 +354,9 @@ begin
         ExecSQL;
       end;
 
-      FSQL := 'SELECT P.ID AS ID, P.NOME AS NOME, P.ESTOQUE AS ESTOQUE, P.CUSTO AS CUSTO, P.PERCENTUAL_LUCRO AS PERCENTUAL ' + 'FROM CARDAPIO_PRODUTO CP LEFT JOIN CARDAPIOS C ON CP.ID_CARDAPIO = C.ID LEFT JOIN PRODUTOS P ON CP.ID_PRODUTO = P.ID ' + 'WHERE C.ID = (SELECT ID FROM CARDAPIOS ORDER BY ID DESC LIMIT 1);';
+      FSQL := 'SELECT P.ID AS ID, P.NOME AS NOME, P.ESTOQUE AS ESTOQUE, P.CUSTO AS CUSTO, P.PERCENTUAL_LUCRO AS PERCENTUAL '
+        + 'FROM CARDAPIO_PRODUTO CP LEFT JOIN CARDAPIOS C ON CP.ID_CARDAPIO = C.ID LEFT JOIN PRODUTOS P ON CP.ID_PRODUTO = P.ID '
+        + 'WHERE C.ID = (SELECT ID FROM CARDAPIOS ORDER BY ID DESC LIMIT 1);';
 
       Close;
       SQL.Text := FSQL;
@@ -417,4 +435,3 @@ begin
 end;
 
 end.
-

@@ -3,7 +3,7 @@ unit Server.Delivery.Model.Caixa;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -14,10 +14,11 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
   Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  DM.Server;
 
 type
-  TModelServerDeliveryCaixa = class(TInterfacedObject, iModelServerDeliveryCaixa<TCAIXA>)
+  TModelServerDeliveryCaixa = class(TInterfacedObject,
+    iModelServerDeliveryCaixa<TCAIXA>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -41,6 +42,7 @@ type
   end;
 
 implementation
+
 { TModelServerDeliveryCaixa }
 
 function TModelServerDeliveryCaixa.CloseCaixa(aID: Integer): TJSONObject;
@@ -79,7 +81,7 @@ end;
 
 constructor TModelServerDeliveryCaixa.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
@@ -107,14 +109,16 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryCaixa.GetBetweenDates(aInitalDate, aFinalDate: TDate): TJSONArray;
+function TModelServerDeliveryCaixa.GetBetweenDates(aInitalDate,
+  aFinalDate: TDate): TJSONArray;
 begin
   FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE date(C."DATA") BETWEEN date(:INICIAL_DATE) AND date(:FINAL_DATE)';
   with FQuery do
   begin
     Close;
     SQL.Text := FSQL;
-    ParamByName('INICIAL_DATE').Value := FormatDateTime('yyyy-mm-dd', aInitalDate);
+    ParamByName('INICIAL_DATE').Value := FormatDateTime('yyyy-mm-dd',
+      aInitalDate);
     ParamByName('FINAL_DATE').Value := FormatDateTime('yyyy-mm-dd', aFinalDate);
     Open;
   end;
@@ -177,7 +181,6 @@ begin
       Connection.StartTransaction;
       SQL.Text := FSQL;
       ExecSQL;
-
 
       FSQL := 'SELECT C.ID, C."DATA" AS DATA_ABERTURA, C.ABERTO, C.TOTAL FROM CAIXAS C WHERE C.ABERTO = 1;';
 
@@ -256,4 +259,3 @@ begin
 end;
 
 end.
-

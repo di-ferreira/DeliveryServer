@@ -12,11 +12,11 @@ uses
   FireDAC.Comp.UI, Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
-  Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection, System.JSON;
+  Server.Delivery.DTO, Server.Delivery.Model.Interfaces, System.JSON, DM.Server;
 
 type
-  TModelServerDeliveryCliente = class(TInterfacedObject, iModelServerDeliveryCliente<TCLIENTE>)
+  TModelServerDeliveryCliente = class(TInterfacedObject,
+    iModelServerDeliveryCliente<TCLIENTE>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -42,7 +42,7 @@ implementation
 
 constructor TModelServerDeliveryCliente.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
@@ -112,7 +112,8 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryCliente.GetByContato(aContato: string): TJSONObject;
+function TModelServerDeliveryCliente.GetByContato(aContato: string)
+  : TJSONObject;
 begin
   FSQL := 'select id, nome, contato from clientes where contato=:contato';
   with FQuery do
@@ -148,7 +149,8 @@ begin
 
 end;
 
-class function TModelServerDeliveryCliente.New: iModelServerDeliveryCliente<TCLIENTE>;
+class function TModelServerDeliveryCliente.New
+  : iModelServerDeliveryCliente<TCLIENTE>;
 begin
   Result := Self.Create;
 end;
@@ -215,4 +217,3 @@ begin
 end;
 
 end.
-

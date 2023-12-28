@@ -3,7 +3,7 @@ unit Server.Delivery.Model.TipoCardapio;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, System.JSON, REST.Json,
+  System.Generics.Collections, System.SysUtils, System.JSON, REST.JSON,
   DataSet.Serialize,
   {FIREDAC CONNECTION}
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
@@ -14,10 +14,11 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
   Server.Delivery.DTO, Server.Delivery.Model.Interfaces,
-  Server.Delivery.SQLite.Connection;
+  DM.Server;
 
 type
-  TModelServerDeliveryTipoCardapio = class(TInterfacedObject, iModelServerDelivery<TTIPO_CARDAPIO>)
+  TModelServerDeliveryTipoCardapio = class(TInterfacedObject,
+    iModelServerDelivery<TTIPO_CARDAPIO>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
@@ -37,14 +38,15 @@ type
   end;
 
 implementation
+
 { TModelServerDeliveryTipoCardapio }
 
 constructor TModelServerDeliveryTipoCardapio.Create;
 begin
-  FConnection := TServerDeliverySQLiteConnection.New;
+  FConnection := DM.Server.DataModuleServer.ServerConnection;
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
-  FTipos := TObjectList<TTIPO_CARDAPIO>.create;
+  FTipos := TObjectList<TTIPO_CARDAPIO>.Create;
   FConnection.Connection.TxOptions.AutoCommit := False;
 end;
 
@@ -137,12 +139,14 @@ begin
 
 end;
 
-class function TModelServerDeliveryTipoCardapio.New: iModelServerDelivery<TTIPO_CARDAPIO>;
+class function TModelServerDeliveryTipoCardapio.New
+  : iModelServerDelivery<TTIPO_CARDAPIO>;
 begin
   Result := Self.Create;
 end;
 
-function TModelServerDeliveryTipoCardapio.Save(aValue: TTIPO_CARDAPIO): TJSONObject;
+function TModelServerDeliveryTipoCardapio.Save(aValue: TTIPO_CARDAPIO)
+  : TJSONObject;
 begin
   FSQL := 'INSERT INTO TIPOS_CARDAPIO (ID, DESCRICAO) VALUES (Null, :DESCRICAO);';
 
@@ -175,7 +179,8 @@ begin
   end;
 end;
 
-function TModelServerDeliveryTipoCardapio.Update(aValue: TTIPO_CARDAPIO): TJSONObject;
+function TModelServerDeliveryTipoCardapio.Update(aValue: TTIPO_CARDAPIO)
+  : TJSONObject;
 begin
   FSQL := 'UPDATE TIPOS_CARDAPIO SET DESCRICAO = :DESCRICAO WHERE id = :id';
   try
@@ -210,4 +215,3 @@ begin
 end;
 
 end.
-

@@ -4,7 +4,7 @@ uses
   Vcl.Forms,
   uTInject.ConfigCEF,
   View.Main.Server in 'View.Main.Server.pas' {ViewMainServer},
-  DM.Server in 'DM.Server.pas' {DataModule1: TDataModule},
+  DM.Server in 'DM.Server.pas' {DataModuleServer: TDataModule},
   Server.Delivery.SQLite.Connection in 'MODELS\Server.Delivery.SQLite.Connection.pas',
   Server.Delivery.Model.Interfaces in 'MODELS\Server.Delivery.Model.Interfaces.pas',
   Server.Delivery.Model.Produto in 'MODELS\Server.Delivery.Model.Produto.pas',
@@ -45,6 +45,7 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TViewMainServer, ViewMainServer);
-  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TDataModuleServer, DataModuleServer);
   Application.Run;
+
 end.
