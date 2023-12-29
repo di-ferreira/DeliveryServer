@@ -3,7 +3,8 @@ unit Server.Delivery.Model.Interfaces;
 interface
 
 uses
-  System.Generics.Collections, FireDAC.Comp.Client, System.JSON;
+  System.Generics.Collections, FireDAC.Comp.Client, System.JSON,
+  cqlbr.interfaces;
 
 type
   iModelServerDelivery<T: class, constructor> = interface
@@ -59,6 +60,7 @@ type
     ['{538D49B4-4CDE-424C-8C5E-E520F01DC628}']
     function Connection: TFDConnection;
     procedure AfterConnection(Sender: TObject);
+    function SQL:ICQL;
   end;
 
 implementation

@@ -12,7 +12,8 @@ uses
   FireDAC.Comp.UI, Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   {Interfaces}
-  Server.Delivery.DTO, Server.Delivery.Model.Interfaces, System.JSON, DM.Server;
+  Server.Delivery.DTO, Server.Delivery.Model.Interfaces, System.JSON, DM.Server,
+  cqlbr.interfaces;
 
 type
   TModelServerDeliveryCliente = class(TInterfacedObject,
@@ -21,6 +22,7 @@ type
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
     FSQL: string;
+    FCQL:ICQL;
   public
     constructor Create;
     destructor Destroy; override;
@@ -46,6 +48,7 @@ begin
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
+  FCQL := DM.Server.DataModuleServer.ServerConnection.SQL;
 end;
 
 function TModelServerDeliveryCliente.Delete(aID: Integer): TJSONObject;
@@ -101,11 +104,10 @@ end;
 
 function TModelServerDeliveryCliente.GetAll: TJSONArray;
 begin
-  FSQL := 'select id, nome, contato from clientes';
   with FQuery do
   begin
     Close;
-    SQL.Text := FSQL;
+    SQL.Text := FCQL.Select.ALL.From('clientes').AsString;
     Open;
   end;
 
@@ -157,21 +159,25 @@ end;
 
 function TModelServerDeliveryCliente.Save(aValue: TCLIENTE): TJSONObject;
 begin
-  FSQL := 'insert into clientes (id, nome, contato) values (null,:nome,:contato)';
-
   with FQuery do
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FSQL;
-      ParamByName('nome').Value := aValue.NOME;
-      ParamByName('contato').Value := aValue.CONTATO;
+      SQL.Text := FCQL
+                  .Insert
+                  .Into('clientes')
+                  .&Set('nome', aValue.NOME)
+                  .&Set('contato', aValue.CONTATO)
+                  .AsString;
       ExecSQL;
       Connection.Commit;
-      FSQL := 'select id, nome, contato from clientes where id=last_insert_rowid();';
 
       Close;
-      SQL.Text := FSQL;
+      SQL.Text := FCQL
+                  .Select
+                  .All
+                  .From('clientes')
+                  .Where('id=last_insert_rowid()').AsString;
       Open;
 
       Result := FQuery.ToJSONObject();

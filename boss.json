@@ -6,6 +6,7 @@
 	"mainsrc": "./src",
 	"projects": [],
 	"dependencies": {
+		"github.com/hashload/cqlbr": "^1.1.51",
 		"github.com/hashload/horse": "^3.0.2",
 		"github.com/hashload/horse-compression": "^1.1.7",
 		"github.com/hashload/horse-cors": "^1.0.5",
