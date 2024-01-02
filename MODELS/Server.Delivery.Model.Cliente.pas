@@ -16,13 +16,12 @@ uses
   cqlbr.interfaces;
 
 type
-  TModelServerDeliveryCliente = class(TInterfacedObject,
-    iModelServerDeliveryCliente<TCLIENTE>)
+  TModelServerDeliveryCliente = class(TInterfacedObject, iModelServerDeliveryCliente<TCLIENTE>)
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
     FSQL: string;
-    FCQL:ICQL;
+    FCQL: ICQL;
   public
     constructor Create;
     destructor Destroy; override;
@@ -53,12 +52,16 @@ end;
 
 function TModelServerDeliveryCliente.Delete(aID: Integer): TJSONObject;
 begin
-  FSQL := 'delete from clientes where id = :id';
   with FQuery do
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FSQL;
+      SQL.Text := FCQL
+                     .Delete
+                     .From('clientes')
+                     .Where('id')
+                     .Equal(':id')
+                     .AsString;
       ParamByName('id').Value := aID;
       ExecSQL;
       Connection.Commit;
@@ -75,12 +78,18 @@ end;
 
 function TModelServerDeliveryCliente.Delete(aValue: string): TJSONObject;
 begin
-  FSQL := 'delete from clientes where id = :id or contato = :contato';
   with FQuery do
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FSQL;
+      SQL.Text := FCQL
+                     .Delete
+                     .From('clientes')
+                     .Where('id')
+                     .Equal(':id')
+                     .&Or('contato')
+                     .Equal(':contato')
+                     .AsString;
       ParamByName('id').Value := aValue;
       ParamByName('contato').Value := aValue;
       ExecSQL;
@@ -114,14 +123,18 @@ begin
   Result := FQuery.ToJSONArray();
 end;
 
-function TModelServerDeliveryCliente.GetByContato(aContato: string)
-  : TJSONObject;
+function TModelServerDeliveryCliente.GetByContato(aContato: string): TJSONObject;
 begin
-  FSQL := 'select id, nome, contato from clientes where contato=:contato';
   with FQuery do
   begin
     Close;
-    SQL.Text := FSQL;
+    SQL.Text := FCQL
+                  .Select
+                  .ALL
+                  .From('clientes')
+                  .Where('contato')
+                  .Equal(':contato')
+                  .AsString;
     ParamByName('contato').Value := aContato;
     Open;
   end;
@@ -130,11 +143,16 @@ end;
 
 function TModelServerDeliveryCliente.GetByID(aID: Integer): TJSONObject;
 begin
-  FSQL := 'select id, nome, contato from clientes where id=:id';
   with FQuery do
   begin
     Close;
-    SQL.Text := FSQL;
+    SQL.Text := FCQL
+                  .Select
+                  .ALL
+                  .From('clientes')
+                  .Where('id')
+                  .Equal(':id')
+                  .AsString;
     ParamByName('id').Value := aID;
     Open;
   end;
@@ -151,8 +169,7 @@ begin
 
 end;
 
-class function TModelServerDeliveryCliente.New
-  : iModelServerDeliveryCliente<TCLIENTE>;
+class function TModelServerDeliveryCliente.New: iModelServerDeliveryCliente<TCLIENTE>;
 begin
   Result := Self.Create;
 end;
@@ -163,21 +180,12 @@ begin
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FCQL
-                  .Insert
-                  .Into('clientes')
-                  .&Set('nome', aValue.NOME)
-                  .&Set('contato', aValue.CONTATO)
-                  .AsString;
+      SQL.Text := FCQL.Insert.Into('clientes').&Set('nome', aValue.NOME).&Set('contato', aValue.CONTATO).AsString;
       ExecSQL;
       Connection.Commit;
 
       Close;
-      SQL.Text := FCQL
-                  .Select
-                  .All
-                  .From('clientes')
-                  .Where('id=last_insert_rowid()').AsString;
+      SQL.Text := FCQL.Select.All.From('clientes').Limit(1).Desc.AsString;
       Open;
 
       Result := FQuery.ToJSONObject();
@@ -194,21 +202,29 @@ end;
 
 function TModelServerDeliveryCliente.Update(aValue: TCLIENTE): TJSONObject;
 begin
-  FSQL := 'update clientes set nome = :nome where id = :id';
   with FQuery do
   begin
     Connection.StartTransaction;
-    SQL.Text := FSQL;
+    SQL.Text := FCQL
+                   .Update('clientes')
+                   .&Set('nome',':nome')
+                   .Where('id')
+                   .Equal(':id')
+                   .AsString;
     try
       ParamByName('id').Value := aValue.ID;
       ParamByName('nome').Value := aValue.NOME;
       ExecSQL;
       Connection.Commit;
 
-      FSQL := 'select id, nome, contato from clientes where id=:id;';
       ParamByName('id').Value := aValue.ID;
       Close;
-      SQL.Text := FSQL;
+      SQL.Text := FCQL
+                     .Select
+                     .All
+                     .From('clientes')
+                     .Where('id = :id')
+                     .AsString;
       Open;
 
       Result := FQuery.ToJSONObject();
@@ -223,3 +239,4 @@ begin
 end;
 
 end.
+
