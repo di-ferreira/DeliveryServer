@@ -20,8 +20,7 @@ type
   private
     FConnection: iModelServerDeliveryConnection;
     FQuery: TFDQuery;
-    FSQL: string;
-    FCQL: ICQL;
+    FSQL: ICQL;
   public
     constructor Create;
     destructor Destroy; override;
@@ -47,7 +46,7 @@ begin
   FQuery := TFDQuery.Create(nil);
   FQuery.Connection := FConnection.Connection;
   FConnection.Connection.TxOptions.AutoCommit := False;
-  FCQL := DM.Server.DataModuleServer.ServerConnection.SQL;
+  FSQL := DM.Server.DataModuleServer.ServerConnection.SQL;
 end;
 
 function TModelServerDeliveryCliente.Delete(aID: Integer): TJSONObject;
@@ -56,7 +55,7 @@ begin
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FCQL
+      SQL.Text := FSQL
                      .Delete
                      .From('clientes')
                      .Where('id')
@@ -82,7 +81,7 @@ begin
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FCQL
+      SQL.Text := FSQL
                      .Delete
                      .From('clientes')
                      .Where('id')
@@ -116,7 +115,7 @@ begin
   with FQuery do
   begin
     Close;
-    SQL.Text := FCQL.Select.ALL.From('clientes').AsString;
+    SQL.Text := FSQL.Select.ALL.From('clientes').AsString;
     Open;
   end;
 
@@ -128,7 +127,7 @@ begin
   with FQuery do
   begin
     Close;
-    SQL.Text := FCQL
+    SQL.Text := FSQL
                   .Select
                   .ALL
                   .From('clientes')
@@ -146,7 +145,7 @@ begin
   with FQuery do
   begin
     Close;
-    SQL.Text := FCQL
+    SQL.Text := FSQL
                   .Select
                   .ALL
                   .From('clientes')
@@ -180,12 +179,12 @@ begin
   begin
     try
       Connection.StartTransaction;
-      SQL.Text := FCQL.Insert.Into('clientes').&Set('nome', aValue.NOME).&Set('contato', aValue.CONTATO).AsString;
+      SQL.Text := FSQL.Insert.Into('clientes').&Set('nome', aValue.NOME).&Set('contato', aValue.CONTATO).AsString;
       ExecSQL;
       Connection.Commit;
 
       Close;
-      SQL.Text := FCQL.Select.All.From('clientes').Limit(1).Desc.AsString;
+      SQL.Text := FSQL.Select.All.From('clientes').Limit(1).Desc.AsString;
       Open;
 
       Result := FQuery.ToJSONObject();
@@ -205,7 +204,7 @@ begin
   with FQuery do
   begin
     Connection.StartTransaction;
-    SQL.Text := FCQL
+    SQL.Text := FSQL
                    .Update('clientes')
                    .&Set('nome',':nome')
                    .Where('id')
@@ -219,7 +218,7 @@ begin
 
       ParamByName('id').Value := aValue.ID;
       Close;
-      SQL.Text := FCQL
+      SQL.Text := FSQL
                      .Select
                      .All
                      .From('clientes')
